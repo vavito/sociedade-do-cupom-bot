@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint and Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # Baixa o código do repositório
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Instala a versão exata do Python usada no projeto
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Instala o uv, gerenciador de pacotes escolhido
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      # Cache das dependências gerenciadas pelo uv
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+
+      # Instala dependências do projeto
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      # Verifica formatação
+      - name: Check formatting with Ruff
+        run: uv run ruff format --check .
+
+      # Roda linter
+      - name: Run Ruff lint
+        run: uv run ruff check .
+
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # Baixa o código do repositório
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Instala a versão exata do Python usada no projeto
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Instala o uv, gerenciador de pacotes escolhido
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      # Cache das dependências gerenciadas pelo uv
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+
+      # Instala dependências do projeto
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      # Build/validação de empacotamento sem rodar testes
+      - name: Build package
+        run: uv build
+
+      # Roda testes com cobertura
+      - name: Run tests with coverage
+        run: uv run pytest --cov=src --cov-report=term-missing
