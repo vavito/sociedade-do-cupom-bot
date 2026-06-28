@@ -57,7 +57,7 @@ A integracao Shopee usa a API GraphQL de afiliados:
 ```env
 SHOPEE_APP_ID=
 SHOPEE_SECRET=
-SHOPEE_SUB_ID=telegram_canal
+SHOPEE_SUB_ID=telegram
 SHOPEE_API_BASE_URL=https://open-api.affiliate.shopee.com.br/graphql
 ```
 
