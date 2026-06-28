@@ -112,11 +112,7 @@ class AliExpressClient:
                 "ship_to_country": "BR",
             },
         )
-        links = (
-            resposta.get("resp_result", {})
-            .get("result", {})
-            .get("promotion_links", [])
-        )
+        links = resposta.get("resp_result", {}).get("result", {}).get("promotion_links", [])
         return [item["promotion_link"] for item in links if item.get("promotion_link")]
 
     async def _request(self, api_method: str, params: dict[str, Any]) -> dict[str, Any]:

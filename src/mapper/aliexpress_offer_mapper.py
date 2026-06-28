@@ -14,9 +14,7 @@ def extrair_produtos(payload: dict[str, Any]) -> list[AliExpressProdutoRaw]:
     if isinstance(produtos, dict):
         produtos = produtos.get("product", [])
     return [
-        cast(AliExpressProdutoRaw, produto)
-        for produto in produtos
-        if isinstance(produto, dict)
+        cast(AliExpressProdutoRaw, produto) for produto in produtos if isinstance(produto, dict)
     ]
 
 
