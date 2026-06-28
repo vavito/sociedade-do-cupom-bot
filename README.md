@@ -50,6 +50,19 @@ No chat privado com o bot do Telegram, use:
 
 Ao escolher gerar post, envie um link de produto da AliExpress. O bot monta o texto do post, oferece postar no canal configurado em `TELEGRAM_CHAT_ID` ou gerar um novo post.
 
+## Shopee
+
+A integracao Shopee usa a API GraphQL de afiliados:
+
+```env
+SHOPEE_APP_ID=
+SHOPEE_SECRET=
+SHOPEE_SUB_ID=telegram_canal
+SHOPEE_API_BASE_URL=https://open-api.affiliate.shopee.com.br/graphql
+```
+
+O cliente assina cada requisicao com o header `Authorization` no formato exigido pela Shopee e expõe buscas de ofertas de produto, ofertas de loja e geracao de short link.
+
 ## Supabase
 
 Use a connection string do Supabase com o driver async do projeto:
