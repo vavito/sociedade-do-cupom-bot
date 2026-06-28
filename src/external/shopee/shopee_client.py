@@ -7,13 +7,12 @@ import httpx
 from src.external.shopee.shopee_signature import gerar_authorization_header
 
 PRODUCT_OFFER_QUERY = """
-query ProductOfferV2($keyword: String, $shopId: String, $itemId: String, $page: Int, $limit: Int) {
+query ProductOfferV2($keyword: String, $shopId: Int64, $itemId: Int64, $page: Int, $limit: Int) {
   productOfferV2(keyword: $keyword, shopId: $shopId, itemId: $itemId, page: $page, limit: $limit) {
     nodes {
       itemId
       shopId
       productName
-      itemName
       imageUrl
       productLink
       offerLink
@@ -24,7 +23,6 @@ query ProductOfferV2($keyword: String, $shopId: String, $itemId: String, $page: 
       commission
       sales
       ratingStar
-      discount
       shopName
     }
     pageInfo {
@@ -58,8 +56,8 @@ query ShopOfferV2($keyword: String, $page: Int, $limit: Int) {
 """
 
 GENERATE_SHORT_LINK_MUTATION = """
-mutation GenerateShortLink($input: GenerateShortLinkInput!) {
-  generateShortLink(input: $input) {
+mutation GenerateShortLink($originUrl: String!, $subIds: [String!]) {
+  generateShortLink(input: {originUrl: $originUrl, subIds: $subIds}) {
     shortLink
   }
 }
@@ -84,8 +82,8 @@ class ShopeeClient:
     async def buscar_product_offers(
         self,
         keyword: str | None = None,
-        shop_id: str | None = None,
-        item_id: str | None = None,
+        shop_id: int | None = None,
+        item_id: int | None = None,
         page: int = 1,
         limit: int = 20,
     ) -> dict[str, Any]:
@@ -119,10 +117,8 @@ class ShopeeClient:
         payload = await self._request(
             GENERATE_SHORT_LINK_MUTATION,
             {
-                "input": {
-                    "originUrl": origin_url,
-                    "subIds": [sub_id or self.sub_id] if sub_id or self.sub_id else [],
-                }
+                "originUrl": origin_url,
+                "subIds": [sub_id or self.sub_id] if sub_id or self.sub_id else [],
             },
         )
         short_link = payload.get("data", {}).get("generateShortLink", {}).get("shortLink")

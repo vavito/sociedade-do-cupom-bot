@@ -30,6 +30,10 @@ async def test_buscar_product_offers_envia_graphql_assinado() -> None:
     assert payload == {"data": {"productOfferV2": {"nodes": []}}}
     assert captured["authorization"].startswith("SHA256 Credential=123, Timestamp=")
     assert "productOfferV2" in captured["payload"]["query"]
+    assert "$shopId: Int64" in captured["payload"]["query"]
+    assert "$itemId: Int64" in captured["payload"]["query"]
+    assert "itemName" not in captured["payload"]["query"]
+    assert "discount" not in captured["payload"]["query"]
     assert captured["payload"]["variables"]["keyword"] == "ssd"
     assert captured["payload"]["variables"]["limit"] == 5
     assert "shopId" not in captured["payload"]["variables"]
@@ -37,7 +41,10 @@ async def test_buscar_product_offers_envia_graphql_assinado() -> None:
 
 @pytest.mark.asyncio
 async def test_gerar_short_link_retorna_link() -> None:
-    def handler(_: httpx.Request) -> httpx.Response:
+    captured: dict = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["payload"] = json.loads(request.content.decode("utf-8"))
         return httpx.Response(
             200,
             json={"data": {"generateShortLink": {"shortLink": "https://s.shopee.com.br/abc"}}},
@@ -55,3 +62,10 @@ async def test_gerar_short_link_retorna_link() -> None:
         assert await client.gerar_short_link("https://shopee.com.br/produto") == (
             "https://s.shopee.com.br/abc"
         )
+
+    assert "GenerateShortLinkInput" not in captured["payload"]["query"]
+    assert "$subIds: [String!]" in captured["payload"]["query"]
+    assert captured["payload"]["variables"] == {
+        "originUrl": "https://shopee.com.br/produto",
+        "subIds": ["telegram"],
+    }
