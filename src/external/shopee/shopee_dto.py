@@ -1,6 +1,21 @@
-from typing import TypedDict
+from typing import Any, TypedDict
 
 
 class ShopeeProdutoRaw(TypedDict, total=False):
-    item_id: str
-    title: str
+    itemId: str
+    shopId: str
+    productName: str
+    itemName: str
+    imageUrl: str
+    productLink: str
+    offerLink: str
+    priceMin: str
+    priceMax: str
+    price: str
+    commissionRate: str
+    commission: str
+    sales: str
+    ratingStar: str
+    discount: str
+    shopName: str
+    raw: dict[str, Any]

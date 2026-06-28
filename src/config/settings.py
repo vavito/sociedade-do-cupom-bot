@@ -22,6 +22,14 @@ class Settings(BaseSettings):
         alias="ALIEXPRESS_API_BASE_URL",
     )
 
+    shopee_app_id: str = Field(default="", alias="SHOPEE_APP_ID")
+    shopee_secret: str = Field(default="", alias="SHOPEE_SECRET")
+    shopee_sub_id: str = Field(default="telegram_canal", alias="SHOPEE_SUB_ID")
+    shopee_api_base_url: str = Field(
+        default="https://open-api.affiliate.shopee.com.br/graphql",
+        alias="SHOPEE_API_BASE_URL",
+    )
+
     scheduler_interval_minutes: int = Field(default=10, alias="SCHEDULER_INTERVAL_MINUTES")
     scheduler_enabled: bool = Field(default=True, alias="SCHEDULER_ENABLED")
 
