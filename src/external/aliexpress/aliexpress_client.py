@@ -112,7 +112,11 @@ class AliExpressClient:
                 "ship_to_country": "BR",
             },
         )
-        links = resposta.get("resp_result", {}).get("result", {}).get("promotion_links", [])
+        response_payload = self._extrair_response_payload(resposta)
+        promotion_links = (
+            response_payload.get("resp_result", {}).get("result", {}).get("promotion_links", [])
+        )
+        links = self._normalizar_promotion_links(promotion_links)
         return [item["promotion_link"] for item in links if item.get("promotion_link")]
 
     async def _request(self, api_method: str, params: dict[str, Any]) -> dict[str, Any]:
@@ -155,6 +159,20 @@ class AliExpressClient:
             if chave.endswith("_response") and isinstance(valor, dict):
                 return valor
         return payload
+
+    @staticmethod
+    def _normalizar_promotion_links(valor: Any) -> list[dict[str, Any]]:
+        if isinstance(valor, list):
+            return [item for item in valor if isinstance(item, dict)]
+        if isinstance(valor, dict):
+            promotion_link = valor.get("promotion_link")
+            if isinstance(promotion_link, list):
+                return [item for item in promotion_link if isinstance(item, dict)]
+            if isinstance(promotion_link, dict):
+                return [promotion_link]
+            if isinstance(valor.get("source_value"), str) and isinstance(promotion_link, str):
+                return [valor]
+        return []
 
     def _params_comuns(self, api_method: str) -> dict[str, str]:
         return {
