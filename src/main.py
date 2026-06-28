@@ -4,6 +4,7 @@ from src.config.settings import get_settings
 from src.controller.scheduler_controller import SchedulerController
 from src.controller.telegram_post_controller import TelegramPostController
 from src.external.aliexpress.aliexpress_client import AliExpressClient
+from src.external.shopee.shopee_client import ShopeeClient
 from src.external.telegram.telegram_client import TelegramClient
 from src.infrastructure.database.session import criar_session_factory
 from src.infrastructure.logger.logger import configure_logging
@@ -29,6 +30,12 @@ async def main() -> None:
         bot_token=settings.telegram_bot_token,
         chat_id=settings.telegram_chat_id,
     )
+    shopee_client = ShopeeClient(
+        app_id=settings.shopee_app_id,
+        secret=settings.shopee_secret,
+        base_url=settings.shopee_api_base_url,
+        sub_id=settings.shopee_sub_id,
+    )
     afiliado_service = AfiliadoService(aliexpress_client)
     postagem_service = PostagemService(telegram_client)
     pipeline_service = PipelineService(
@@ -40,7 +47,11 @@ async def main() -> None:
     )
     telegram_post_controller = TelegramPostController(
         telegram_client=telegram_client,
-        gerador_post_service=GeradorPostService(aliexpress_client, afiliado_service),
+        gerador_post_service=GeradorPostService(
+            aliexpress_client,
+            afiliado_service,
+            shopee_client=shopee_client,
+        ),
         postagem_service=postagem_service,
     )
 
