@@ -10,7 +10,7 @@ from src.service.postagem_service import PostagemService
 logger = logging.getLogger(__name__)
 
 MENU = "Escolha uma opcao:\n1. Gerar post\n2. Sair"
-PEDIR_LINK = "Envie um link valido da AliExpress."
+PEDIR_LINK = "Envie um link valido da AliExpress ou Shopee."
 MENU_POST_GERADO = "1. Postar no canal\n2. Gerar novo post\n3. Sair"
 
 
