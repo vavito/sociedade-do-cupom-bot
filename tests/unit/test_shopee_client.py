@@ -93,3 +93,28 @@ async def test_gerar_short_link_retorna_link() -> None:
         "originUrl": "https://shopee.com.br/produto",
         "subIds": ["telegram"],
     }
+
+
+@pytest.mark.asyncio
+async def test_gerar_short_link_normaliza_sub_id() -> None:
+    captured: dict = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["payload"] = json.loads(request.content.decode("utf-8"))
+        return httpx.Response(
+            200,
+            json={"data": {"generateShortLink": {"shortLink": "https://s.shopee.com.br/abc"}}},
+        )
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http_client:
+        client = ShopeeClient(
+            app_id="123",
+            secret="secret",
+            base_url="https://example.com/graphql",
+            sub_id="telegram_canal",
+            http_client=http_client,
+        )
+
+        await client.gerar_short_link("https://shopee.com.br/produto")
+
+    assert captured["payload"]["variables"]["subIds"] == ["telegramcanal"]
