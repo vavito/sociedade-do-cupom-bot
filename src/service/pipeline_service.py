@@ -27,6 +27,13 @@ BUSCAS_INICIAIS = [
     "headset gamer",
 ]
 
+CATEGORIAS_TECNOLOGIA_ALIEXPRESS = [
+    "200001076",  # Computer Components
+    "200001081",  # Computer Peripherals
+    "200048142",  # DIY Gaming Computer
+    "200001083",  # Laptop Parts & Accessories
+]
+
 
 @dataclass(frozen=True)
 class PipelineResultado:
@@ -102,9 +109,31 @@ class PipelineService:
     async def _buscar_ofertas_aliexpress(self) -> list[OfertaDTO]:
         ofertas_por_produto: dict[str, OfertaDTO] = {}
 
+        for category_id in CATEGORIAS_TECNOLOGIA_ALIEXPRESS:
+            try:
+                hot_payload = await self.aliexpress_client.buscar_hot_products(
+                    category_ids=category_id
+                )
+                ofertas = mapear_resposta_aliexpress(hot_payload)
+            except RuntimeError as exc:
+                logger.warning("Hot Products falhou para categoria %s: %s", category_id, exc)
+                ofertas = []
+
+            for oferta in ofertas:
+                ofertas_por_produto.setdefault(oferta.produto.external_id, oferta)
+
+        if ofertas_por_produto:
+            return list(ofertas_por_produto.values())
+
         for keywords in BUSCAS_INICIAIS:
-            payload = await self.aliexpress_client.buscar_hot_products(keywords=keywords)
-            for oferta in mapear_resposta_aliexpress(payload):
+            try:
+                smart_payload = await self.aliexpress_client.buscar_smart_match(keywords=keywords)
+                ofertas = mapear_resposta_aliexpress(smart_payload)
+            except RuntimeError as exc:
+                logger.warning("Smart Match falhou para %s: %s", keywords, exc)
+                ofertas = []
+
+            for oferta in ofertas:
                 ofertas_por_produto.setdefault(oferta.produto.external_id, oferta)
 
         return list(ofertas_por_produto.values())

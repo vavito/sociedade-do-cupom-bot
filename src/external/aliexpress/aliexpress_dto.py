@@ -17,6 +17,7 @@ class AliExpressProdutoRaw(TypedDict, total=False):
     discount: str
     evaluate_rate: str
     latest_volume: str
+    lastest_volume: str
     commission_rate: str
     hot_product_commission_rate: str
     first_level_category_name: str

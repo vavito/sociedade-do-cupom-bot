@@ -76,7 +76,7 @@ class AliExpressClient:
         keywords: str,
         page_no: int = 1,
         page_size: int = 20,
-        device_id: str = "",
+        device_id: str = "null",
     ) -> dict[str, Any]:
         return await self._request(
             "aliexpress.affiliate.product.smartmatch",
@@ -134,8 +134,26 @@ class AliExpressClient:
 
         response.raise_for_status()
         payload = cast(dict[str, Any], response.json())
+        if "error_response" in payload:
+            error = payload["error_response"]
+            raise RuntimeError(f"Erro AliExpress: {error.get('code')} - {error.get('msg')}")
+
+        response_payload = self._extrair_response_payload(payload)
+        resp_result = response_payload.get("resp_result", {})
+        resp_code = resp_result.get("resp_code")
+        resp_msg = resp_result.get("resp_msg")
+        if resp_code not in (None, 200, "200") and resp_msg != "The result is empty":
+            raise RuntimeError(f"Erro AliExpress: {resp_code} - {resp_msg}")
+
         if payload.get("code") not in (None, "0", 0):
             raise RuntimeError(f"Erro AliExpress: {payload}")
+        return payload
+
+    @staticmethod
+    def _extrair_response_payload(payload: dict[str, Any]) -> dict[str, Any]:
+        for chave, valor in payload.items():
+            if chave.endswith("_response") and isinstance(valor, dict):
+                return valor
         return payload
 
     def _params_comuns(self, api_method: str) -> dict[str, str]:

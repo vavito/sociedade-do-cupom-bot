@@ -9,6 +9,7 @@ from src.external.aliexpress.aliexpress_dto import AliExpressProdutoRaw
 
 
 def extrair_produtos(payload: dict[str, Any]) -> list[AliExpressProdutoRaw]:
+    payload = _extrair_response_payload(payload)
     result = payload.get("resp_result", {}).get("result", {})
     produtos = result.get("products", [])
     if isinstance(produtos, dict):
@@ -57,7 +58,9 @@ def mapear_produto_aliexpress(produto_raw: AliExpressProdutoRaw) -> OfertaDTO:
         desconto_percentual=_parse_int_percent(produto_raw.get("discount")),
         cupom_codigo=cupom.get("codigo"),
         cupom_descricao=cupom.get("descricao"),
-        volume_vendas=_parse_int(produto_raw.get("latest_volume")),
+        volume_vendas=_parse_int(
+            produto_raw.get("latest_volume") or produto_raw.get("lastest_volume")
+        ),
         avaliacao_percentual=_parse_int_percent(produto_raw.get("evaluate_rate")),
         comissao_percentual=_parse_decimal_optional(
             produto_raw.get("hot_product_commission_rate") or produto_raw.get("commission_rate")
@@ -123,3 +126,10 @@ def _extrair_cupom(valor: Any) -> dict[str, str | None]:
 def _join_textos(*valores: Any) -> str | None:
     textos = [str(valor).strip() for valor in valores if valor]
     return " / ".join(textos) if textos else None
+
+
+def _extrair_response_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    for chave, valor in payload.items():
+        if chave.endswith("_response") and isinstance(valor, dict):
+            return valor
+    return payload
