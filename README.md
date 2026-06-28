@@ -42,6 +42,8 @@ Use a connection string do Supabase com o driver async do projeto:
 DATABASE_URL=postgresql+asyncpg://postgres.PROJECT_REF:SENHA@HOST:5432/postgres?ssl=require
 ```
 
+Se a senha tiver caracteres especiais, como `@`, `#`, `/`, `?` ou `%`, aplique URL encode antes de colocar na `DATABASE_URL`. Exemplo: `@` vira `%40`.
+
 Para desenvolvimento local, prefira a URL do **Session Pooler** no painel do Supabase. Ela costuma funcionar melhor em redes IPv4 e evita problemas de prepared statements comuns no Transaction Pooler.
 
 Depois de preencher o `.env`, aplique o schema:
