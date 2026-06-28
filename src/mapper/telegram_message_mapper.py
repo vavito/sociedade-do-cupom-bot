@@ -18,8 +18,5 @@ def mapear_oferta_para_telegram(oferta: OfertaDTO) -> TelegramMessageDTO:
 
 def _formatar_preco(valor: Decimal, moeda: str) -> str:
     simbolo = "R$" if moeda.upper() == "BRL" else moeda.upper()
-    if valor == valor.to_integral():
-        texto = f"{valor:.0f}"
-    else:
-        texto = f"{valor:.2f}".replace(".", ",")
+    texto = f"{valor:.0f}" if valor == valor.to_integral() else f"{valor:.2f}".replace(".", ",")
     return f"{simbolo} {texto}"
