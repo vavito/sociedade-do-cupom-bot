@@ -93,6 +93,19 @@ class AliExpressClient:
             },
         )
 
+    async def buscar_product_detail(self, product_id: str) -> dict[str, Any]:
+        return await self._request(
+            "aliexpress.affiliate.productdetail.get",
+            {
+                "fields": PRODUCT_FIELDS,
+                "product_ids": product_id,
+                "target_currency": "BRL",
+                "target_language": "PT",
+                "tracking_id": self.tracking_id,
+                "country": "BR",
+            },
+        )
+
     async def gerar_link_afiliado(
         self,
         source_values: str | Iterable[str],

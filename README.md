@@ -34,6 +34,22 @@ uv run alembic upgrade head
 uv run python -m src.main
 ```
 
+Por padrao, o servico inicia o scheduler automatico e o bot conversacional do Telegram. Para rodar apenas uma parte, ajuste no `.env`:
+
+```env
+SCHEDULER_ENABLED=true
+TELEGRAM_POST_BOT_ENABLED=true
+```
+
+No chat privado com o bot do Telegram, use:
+
+```txt
+1. Gerar post
+2. Sair
+```
+
+Ao escolher gerar post, envie um link de produto da AliExpress. O bot monta o texto do post, oferece postar no canal configurado em `TELEGRAM_CHAT_ID` ou gerar um novo post.
+
 ## Supabase
 
 Use a connection string do Supabase com o driver async do projeto:

@@ -14,25 +14,43 @@ class TelegramClient:
         self.chat_id = chat_id
         self.http_client = http_client
 
-    async def enviar_foto_com_legenda(self, image_url: str, caption: str) -> str | None:
-        if not self.bot_token or not self.chat_id:
-            raise RuntimeError("TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID precisam estar configurados.")
+    async def enviar_foto_com_legenda(
+        self,
+        image_url: str,
+        caption: str,
+        chat_id: str | None = None,
+    ) -> str | None:
+        target_chat_id = self._resolver_chat_id(chat_id)
 
-        payload = {"chat_id": self.chat_id, "photo": image_url, "caption": caption}
+        payload = {"chat_id": target_chat_id, "photo": image_url, "caption": caption}
         result = await self._post("sendPhoto", payload)
         message_id = result.get("message_id")
         return str(message_id) if message_id is not None else None
 
-    async def enviar_mensagem(self, text: str) -> str | None:
-        if not self.bot_token or not self.chat_id:
-            raise RuntimeError("TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID precisam estar configurados.")
+    async def enviar_mensagem(self, text: str, chat_id: str | None = None) -> str | None:
+        target_chat_id = self._resolver_chat_id(chat_id)
 
-        payload = {"chat_id": self.chat_id, "text": text, "disable_web_page_preview": False}
+        payload = {"chat_id": target_chat_id, "text": text, "disable_web_page_preview": False}
         result = await self._post("sendMessage", payload)
         message_id = result.get("message_id")
         return str(message_id) if message_id is not None else None
 
-    async def _post(self, method: str, payload: dict[str, Any]) -> dict[str, Any]:
+    async def get_updates(
+        self, offset: int | None = None, timeout: int = 30
+    ) -> list[dict[str, Any]]:
+        params: dict[str, Any] = {"timeout": timeout}
+        if offset is not None:
+            params["offset"] = offset
+
+        result = await self._post("getUpdates", params)
+        if isinstance(result, list):
+            return [update for update in result if isinstance(update, dict)]
+        return []
+
+    async def _post(self, method: str, payload: dict[str, Any]) -> Any:
+        if not self.bot_token:
+            raise RuntimeError("TELEGRAM_BOT_TOKEN precisa estar configurado.")
+
         url = f"https://api.telegram.org/bot{self.bot_token}/{method}"
         if self.http_client is not None:
             response = await self.http_client.post(url, data=payload)
@@ -45,5 +63,10 @@ class TelegramClient:
             description = payload.get("description", "erro desconhecido")
             raise RuntimeError(f"Erro Telegram: {response.status_code} - {description}")
 
-        result = cast(dict[str, Any], payload.get("result", {}))
-        return result
+        return payload.get("result", {})
+
+    def _resolver_chat_id(self, chat_id: str | None) -> str:
+        target_chat_id = chat_id or self.chat_id
+        if not target_chat_id:
+            raise RuntimeError("TELEGRAM_CHAT_ID precisa estar configurado.")
+        return target_chat_id

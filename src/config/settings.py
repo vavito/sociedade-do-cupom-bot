@@ -12,6 +12,7 @@ class Settings(BaseSettings):
 
     telegram_bot_token: str = Field(default="", alias="TELEGRAM_BOT_TOKEN")
     telegram_chat_id: str = Field(default="", alias="TELEGRAM_CHAT_ID")
+    telegram_post_bot_enabled: bool = Field(default=True, alias="TELEGRAM_POST_BOT_ENABLED")
 
     aliexpress_app_key: str = Field(default="", alias="ALIEXPRESS_APP_KEY")
     aliexpress_app_secret: str = Field(default="", alias="ALIEXPRESS_APP_SECRET")
@@ -22,6 +23,7 @@ class Settings(BaseSettings):
     )
 
     scheduler_interval_minutes: int = Field(default=10, alias="SCHEDULER_INTERVAL_MINUTES")
+    scheduler_enabled: bool = Field(default=True, alias="SCHEDULER_ENABLED")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
