@@ -40,6 +40,30 @@ async def test_buscar_product_offers_envia_graphql_assinado() -> None:
 
 
 @pytest.mark.asyncio
+async def test_buscar_product_offers_serializa_ids_int64_como_string() -> None:
+    captured: dict = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["payload"] = json.loads(request.content.decode("utf-8"))
+        return httpx.Response(
+            200,
+            json={"data": {"productOfferV2": {"nodes": []}}},
+        )
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http_client:
+        client = ShopeeClient(
+            app_id="123",
+            secret="secret",
+            base_url="https://example.com/graphql",
+            http_client=http_client,
+        )
+        await client.buscar_product_offers(shop_id=344381236, item_id=52953470536, limit=1)
+
+    assert captured["payload"]["variables"]["shopId"] == "344381236"
+    assert captured["payload"]["variables"]["itemId"] == "52953470536"
+
+
+@pytest.mark.asyncio
 async def test_gerar_short_link_retorna_link() -> None:
     captured: dict = {}
 

@@ -82,8 +82,8 @@ class ShopeeClient:
     async def buscar_product_offers(
         self,
         keyword: str | None = None,
-        shop_id: int | None = None,
-        item_id: int | None = None,
+        shop_id: int | str | None = None,
+        item_id: int | str | None = None,
         page: int = 1,
         limit: int = 20,
     ) -> dict[str, Any]:
@@ -91,8 +91,8 @@ class ShopeeClient:
             PRODUCT_OFFER_QUERY,
             {
                 "keyword": keyword,
-                "shopId": shop_id,
-                "itemId": item_id,
+                "shopId": str(shop_id) if shop_id is not None else None,
+                "itemId": str(item_id) if item_id is not None else None,
                 "page": page,
                 "limit": limit,
             },
