@@ -1,4 +1,5 @@
 import json
+import re
 import time
 from typing import Any, cast
 
@@ -114,11 +115,12 @@ class ShopeeClient:
         )
 
     async def gerar_short_link(self, origin_url: str, sub_id: str | None = None) -> str | None:
+        sub_ids = self._montar_sub_ids(sub_id)
         payload = await self._request(
             GENERATE_SHORT_LINK_MUTATION,
             {
                 "originUrl": origin_url,
-                "subIds": [sub_id or self.sub_id] if sub_id or self.sub_id else [],
+                "subIds": sub_ids,
             },
         )
         short_link = payload.get("data", {}).get("generateShortLink", {}).get("shortLink")
@@ -160,6 +162,18 @@ class ShopeeClient:
     @staticmethod
     def _serializar_payload(payload: dict[str, Any]) -> str:
         return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+
+    def _montar_sub_ids(self, sub_id: str | None = None) -> list[str]:
+        normalizado = self._normalizar_sub_id(sub_id or self.sub_id)
+        return [normalizado] if normalizado else []
+
+    @staticmethod
+    def _normalizar_sub_id(sub_id: str | None) -> str | None:
+        if not sub_id:
+            return None
+
+        normalizado = re.sub(r"[^A-Za-z0-9]", "", sub_id)
+        return normalizado or None
 
     @classmethod
     def _remover_none(cls, valor: Any) -> Any:
