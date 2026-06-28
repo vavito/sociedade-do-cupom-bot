@@ -5,6 +5,8 @@ from src.mapper.telegram_message_mapper import mapear_oferta_para_telegram
 
 
 class PostagemService:
+    TELEGRAM_PHOTO_CAPTION_LIMIT = 1024
+
     def __init__(self, telegram_client: TelegramClient) -> None:
         self.telegram_client = telegram_client
 
@@ -15,6 +17,12 @@ class PostagemService:
         mensagem = self.formatar_mensagem(oferta)
         if not mensagem.image_url:
             raise RuntimeError("Oferta sem imagem nao pode ser publicada no Telegram.")
+
+        if len(mensagem.caption) > self.TELEGRAM_PHOTO_CAPTION_LIMIT:
+            raise RuntimeError(
+                "Legenda maior que o limite do Telegram. "
+                "Gere um link afiliado menor antes de postar."
+            )
 
         message_id = await self.telegram_client.enviar_foto_com_legenda(
             str(mensagem.image_url),

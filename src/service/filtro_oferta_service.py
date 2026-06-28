@@ -39,10 +39,18 @@ PALAVRAS_BLOQUEADAS = {
     "pelicula",
     "película",
     "automotivo",
+    "auto",
     "arduino",
     "raspberry",
     "oled",
     "painel led",
+    "ferramenta",
+    "ferramentas",
+    "solda",
+    "soldador",
+    "estanho",
+    "maleta",
+    "parafusadeira",
 }
 
 

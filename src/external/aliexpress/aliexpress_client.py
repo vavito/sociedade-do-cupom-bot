@@ -76,7 +76,7 @@ class AliExpressClient:
         keywords: str,
         page_no: int = 1,
         page_size: int = 20,
-        device_id: str = "",
+        device_id: str = "null",
     ) -> dict[str, Any]:
         return await self._request(
             "aliexpress.affiliate.product.smartmatch",
@@ -112,7 +112,11 @@ class AliExpressClient:
                 "ship_to_country": "BR",
             },
         )
-        links = resposta.get("resp_result", {}).get("result", {}).get("promotion_links", [])
+        response_payload = self._extrair_response_payload(resposta)
+        promotion_links = (
+            response_payload.get("resp_result", {}).get("result", {}).get("promotion_links", [])
+        )
+        links = self._normalizar_promotion_links(promotion_links)
         return [item["promotion_link"] for item in links if item.get("promotion_link")]
 
     async def _request(self, api_method: str, params: dict[str, Any]) -> dict[str, Any]:
@@ -134,9 +138,41 @@ class AliExpressClient:
 
         response.raise_for_status()
         payload = cast(dict[str, Any], response.json())
+        if "error_response" in payload:
+            error = payload["error_response"]
+            raise RuntimeError(f"Erro AliExpress: {error.get('code')} - {error.get('msg')}")
+
+        response_payload = self._extrair_response_payload(payload)
+        resp_result = response_payload.get("resp_result", {})
+        resp_code = resp_result.get("resp_code")
+        resp_msg = resp_result.get("resp_msg")
+        if resp_code not in (None, 200, "200") and resp_msg != "The result is empty":
+            raise RuntimeError(f"Erro AliExpress: {resp_code} - {resp_msg}")
+
         if payload.get("code") not in (None, "0", 0):
             raise RuntimeError(f"Erro AliExpress: {payload}")
         return payload
+
+    @staticmethod
+    def _extrair_response_payload(payload: dict[str, Any]) -> dict[str, Any]:
+        for chave, valor in payload.items():
+            if chave.endswith("_response") and isinstance(valor, dict):
+                return valor
+        return payload
+
+    @staticmethod
+    def _normalizar_promotion_links(valor: Any) -> list[dict[str, Any]]:
+        if isinstance(valor, list):
+            return [item for item in valor if isinstance(item, dict)]
+        if isinstance(valor, dict):
+            promotion_link = valor.get("promotion_link")
+            if isinstance(promotion_link, list):
+                return [item for item in promotion_link if isinstance(item, dict)]
+            if isinstance(promotion_link, dict):
+                return [promotion_link]
+            if isinstance(valor.get("source_value"), str) and isinstance(promotion_link, str):
+                return [valor]
+        return []
 
     def _params_comuns(self, api_method: str) -> dict[str, str]:
         return {
