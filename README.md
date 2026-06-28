@@ -34,6 +34,28 @@ uv run alembic upgrade head
 uv run python -m src.main
 ```
 
+## Supabase
+
+Use a connection string do Supabase com o driver async do projeto:
+
+```env
+DATABASE_URL=postgresql+asyncpg://postgres.PROJECT_REF:SENHA@HOST:5432/postgres?ssl=require
+```
+
+Para desenvolvimento local, prefira a URL do **Session Pooler** no painel do Supabase. Ela costuma funcionar melhor em redes IPv4 e evita problemas de prepared statements comuns no Transaction Pooler.
+
+Depois de preencher o `.env`, aplique o schema:
+
+```bash
+uv run alembic upgrade head
+```
+
+Se voce so tiver a URL do **Transaction Pooler** na porta `6543`, adicione `prepared_statement_cache_size=0` na query string:
+
+```env
+DATABASE_URL=postgresql+asyncpg://postgres.PROJECT_REF:SENHA@HOST:6543/postgres?ssl=require&prepared_statement_cache_size=0
+```
+
 ## Testes
 
 ```bash
