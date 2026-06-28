@@ -1,0 +1,1 @@
+"""Sociedade Do Cupom bot."""
