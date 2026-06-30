@@ -13,3 +13,4 @@ build/
 .env
 docs-infra/
 data/produtos_candidatos.json
+data/cupom_postagens.json
