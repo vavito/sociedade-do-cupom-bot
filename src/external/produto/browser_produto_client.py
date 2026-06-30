@@ -1,8 +1,15 @@
 import asyncio
+from contextlib import suppress
 from pathlib import Path
 
-from playwright.async_api import BrowserContext, Page, TimeoutError as PlaywrightTimeoutError
-from playwright.async_api import async_playwright
+from playwright.async_api import (
+    BrowserContext,
+    Page,
+    async_playwright,
+)
+from playwright.async_api import (
+    TimeoutError as PlaywrightTimeoutError,
+)
 
 
 class BrowserProdutoClient:
@@ -40,10 +47,8 @@ class BrowserProdutoClient:
     async def _navegar(self, page: Page, url: str) -> None:
         page.set_default_timeout(self.timeout_ms)
         await page.goto(url, wait_until="domcontentloaded", timeout=self.timeout_ms)
-        try:
+        with suppress(PlaywrightTimeoutError):
             await page.wait_for_load_state("networkidle", timeout=min(self.timeout_ms, 10_000))
-        except PlaywrightTimeoutError:
-            pass
         await self._rolar_pagina(page)
 
     async def _rolar_pagina(self, page: Page) -> None:
