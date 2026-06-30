@@ -140,6 +140,10 @@ def _extrair_url(bloco: str, base_url: str) -> str | None:
 
 
 def _extrair_preco(bloco: str) -> Decimal | None:
+    preco_estruturado = _extrair_preco_estruturado(bloco)
+    if preco_estruturado is not None:
+        return preco_estruturado
+
     texto = _limpar_texto(bloco)
     match = re.search(r"R\$\s*([\d\.]+)(?:,(\d{1,2}))?", texto)
     if not match:
@@ -147,6 +151,28 @@ def _extrair_preco(bloco: str) -> Decimal | None:
 
     valor = match.group(1).replace(".", "")
     centavos = (match.group(2) or "00").ljust(2, "0")
+    try:
+        return Decimal(f"{valor}.{centavos}")
+    except InvalidOperation:
+        return None
+
+
+def _extrair_preco_estruturado(bloco: str) -> Decimal | None:
+    fraction_match = re.search(
+        r"class=\"[^\"]*andes-money-amount__fraction[^\"]*\"[^>]*>([\d\.]+)<",
+        bloco,
+        flags=re.IGNORECASE,
+    )
+    if not fraction_match:
+        return None
+
+    cents_match = re.search(
+        r"class=\"[^\"]*andes-money-amount__cents[^\"]*\"[^>]*>(\d{1,2})<",
+        bloco,
+        flags=re.IGNORECASE,
+    )
+    valor = fraction_match.group(1).replace(".", "")
+    centavos = (cents_match.group(1) if cents_match else "00").ljust(2, "0")
     try:
         return Decimal(f"{valor}.{centavos}")
     except InvalidOperation:

@@ -70,14 +70,22 @@ def test_mapeia_produtos_mercado_livre_com_faixa_de_preco() -> None:
       <a href="https://www.mercadolivre.com.br/headset-gamer-logitech/p/MLB123456">
         <h2 class="poly-component__title">Headset Gamer Logitech G435</h2>
       </a>
-      <span class="andes-money-amount">R$ 399,90</span>
+      <span class="andes-money-amount">
+        <span class="andes-money-amount__currency-symbol">R$</span>
+        <span class="andes-money-amount__fraction">399</span>
+        <span class="andes-money-amount__cents">90</span>
+      </span>
       <img data-src="https://example.com/g435.jpg" />
     </li>
     <li class="ui-search-layout__item">
       <a href="https://www.mercadolivre.com.br/headset-gamer-caro/p/MLB999999">
         <h2 class="poly-component__title">Headset Gamer Logitech Astro</h2>
       </a>
-      <span class="andes-money-amount">R$ 1.399,90</span>
+      <span class="andes-money-amount">
+        <span class="andes-money-amount__currency-symbol">R$</span>
+        <span class="andes-money-amount__fraction">1.399</span>
+        <span class="andes-money-amount__cents">90</span>
+      </span>
       <img data-src="https://example.com/astro.jpg" />
     </li>
     """
