@@ -3,34 +3,36 @@ from decimal import ROUND_HALF_UP, Decimal
 from src.dto.cupom_dto import CupomDTO, TipoDescontoCupom
 from src.dto.cupom_produto_match_dto import CupomProdutoMatchDTO
 from src.dto.produto_candidato_dto import ProdutoCandidatoDTO
+from src.service.nicho_produto_service import NichoProduto, NichoProdutoService
 
-PALAVRAS_TECH_PRODUTO = {
-    "amd",
-    "b550",
-    "computador",
-    "console",
-    "cpu",
-    "ddr4",
-    "ddr5",
-    "fone",
-    "game",
-    "gamer",
-    "headset",
-    "intel",
-    "monitor",
-    "mouse",
-    "notebook",
-    "nvme",
-    "placa",
-    "processador",
-    "ryzen",
-    "smartphone",
-    "ssd",
-    "teclado",
+NICHOS_INFORMATICA = {
+    NichoProduto.ARMAZENAMENTO.value,
+    NichoProduto.GABINETE.value,
+    NichoProduto.MONITOR.value,
+    NichoProduto.NOTEBOOK.value,
+    NichoProduto.PLACA_MAE.value,
+    NichoProduto.PLACA_VIDEO.value,
+    NichoProduto.PROCESSADOR.value,
+    NichoProduto.REFRIGERACAO.value,
+}
+
+NICHOS_GAMES = {
+    NichoProduto.ACESSORIO.value,
+    NichoProduto.HEADSET_FONE.value,
+    NichoProduto.MOUSE_MOUSEPAD.value,
+    NichoProduto.TECLADO.value,
+}
+
+NICHOS_SMARTPHONES = {
+    NichoProduto.ACESSORIO.value,
+    NichoProduto.HEADSET_FONE.value,
 }
 
 
 class CupomProdutoMatchService:
+    def __init__(self, nicho_service: NichoProdutoService | None = None) -> None:
+        self.nicho_service = nicho_service or NichoProdutoService()
+
     def gerar_matches(
         self,
         cupons: list[CupomDTO],
@@ -90,9 +92,8 @@ class CupomProdutoMatchService:
 
         return Decimal("0")
 
-    @classmethod
     def _calcular_score(
-        cls,
+        self,
         cupom: CupomDTO,
         produto: ProdutoCandidatoDTO,
         desconto: Decimal,
@@ -106,7 +107,7 @@ class CupomProdutoMatchService:
         if produto.comissao_percentual:
             score += min(int(produto.comissao_percentual), 10)
 
-        if cls._produto_tech(produto):
+        if self._produto_tech(produto):
             score += 10
 
         if cupom.somente_app:
@@ -116,32 +117,26 @@ class CupomProdutoMatchService:
 
         return max(0, min(score, 100))
 
-    @classmethod
-    def _categoria_compativel(cls, cupom: CupomDTO, produto: ProdutoCandidatoDTO) -> bool:
-        if cupom.categoria_hint is None or cupom.categoria_hint == "mercado":
-            return cls._produto_tech(produto)
+    def _categoria_compativel(self, cupom: CupomDTO, produto: ProdutoCandidatoDTO) -> bool:
+        nicho = self._nicho_produto(produto)
+        if nicho is None:
+            return False
 
-        texto = cls._texto_produto(produto)
+        if cupom.categoria_hint is None or cupom.categoria_hint == "mercado":
+            return True
         if cupom.categoria_hint == "informatica":
-            return cls._contem(texto, "informatica", "informática", "pc", "notebook", "placa")
+            return nicho in NICHOS_INFORMATICA
         if cupom.categoria_hint == "games":
-            return cls._contem(texto, "game", "gamer", "console", "headset")
+            return nicho in NICHOS_GAMES
         if cupom.categoria_hint == "smartphones":
-            return cls._contem(texto, "smartphone", "celular", "iphone")
+            return nicho in NICHOS_SMARTPHONES
         return False
 
-    @classmethod
-    def _produto_tech(cls, produto: ProdutoCandidatoDTO) -> bool:
-        texto = cls._texto_produto(produto)
-        return any(palavra in texto for palavra in PALAVRAS_TECH_PRODUTO)
+    def _produto_tech(self, produto: ProdutoCandidatoDTO) -> bool:
+        return self._nicho_produto(produto) is not None
 
-    @staticmethod
-    def _texto_produto(produto: ProdutoCandidatoDTO) -> str:
-        return f"{produto.titulo} {produto.categoria or ''} {produto.marca or ''}".casefold()
-
-    @staticmethod
-    def _contem(texto: str, *termos: str) -> bool:
-        return any(termo in texto for termo in termos)
+    def _nicho_produto(self, produto: ProdutoCandidatoDTO) -> str | None:
+        return self.nicho_service.classificar(produto.titulo, produto.categoria, produto.marca)
 
     @staticmethod
     def _arredondar(valor: Decimal) -> Decimal:
