@@ -1,7 +1,7 @@
+from argparse import Namespace
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
-from argparse import Namespace
 
 from src.dto.cupom_dto import LojaCupom
 from src.dto.produto_candidato_dto import ProdutoCandidatoDTO
