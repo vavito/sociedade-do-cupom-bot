@@ -1,4 +1,7 @@
 from decimal import Decimal
+from pathlib import Path
+
+from pydantic import HttpUrl
 
 from src.dto.cupom_dto import LojaCupom, TipoDescontoCupom
 from src.dto.cupom_produto_match_dto import CupomProdutoMatchDTO
@@ -6,6 +9,12 @@ from src.dto.telegram_message_dto import TelegramMessageDTO
 
 
 class CupomPostPreviewService:
+    ASSETS_DIR = Path(__file__).resolve().parents[1] / "assets"
+    BANNERS_POR_LOJA = {
+        LojaCupom.AMAZON: ASSETS_DIR / "banner_telegram_amazon.jpg",
+        LojaCupom.MERCADO_LIVRE: ASSETS_DIR / "banner_telegram_mercadolivre.jpg",
+    }
+
     def gerar(self, match: CupomProdutoMatchDTO) -> TelegramMessageDTO:
         cupom = match.cupom
         produto = match.produto
@@ -23,7 +32,10 @@ class CupomPostPreviewService:
             linhas.insert(2, "Primeira compra")
 
         linhas.extend(["", "(Anuncio)"])
-        return TelegramMessageDTO(image_url=produto.imagem_url, caption="\n".join(linhas))
+        return TelegramMessageDTO(
+            image_url=self._resolver_imagem(cupom.loja, produto.imagem_url),
+            caption="\n".join(linhas),
+        )
 
     def _formatar_beneficio(self, match: CupomProdutoMatchDTO) -> str:
         cupom = match.cupom
@@ -54,6 +66,17 @@ class CupomPostPreviewService:
             LojaCupom.SHOPEE: "Shopee",
         }
         return nomes.get(loja, "Loja")
+
+    @classmethod
+    def _resolver_imagem(
+        cls,
+        loja: LojaCupom,
+        imagem_produto: HttpUrl | str | None,
+    ) -> str | None:
+        banner = cls.BANNERS_POR_LOJA.get(loja)
+        if banner and banner.exists():
+            return str(banner)
+        return str(imagem_produto) if imagem_produto else None
 
     @classmethod
     def _formatar_moeda(cls, valor: Decimal) -> str:
