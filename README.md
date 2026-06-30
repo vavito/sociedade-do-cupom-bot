@@ -93,6 +93,24 @@ Para buscar produtos candidatos dessas fontes sem salvar:
 uv run python -m src.tools.atualizar_produtos_candidatos --limite-por-fonte 5
 ```
 
+Se HTTP direto retornar bloqueio ou HTML incompleto, instale o Chromium do Playwright:
+
+```bash
+uv run playwright install chromium
+```
+
+E rode a coleta com navegador real:
+
+```bash
+uv run python -m src.tools.atualizar_produtos_candidatos --browser --limite-por-fonte 5
+```
+
+Para abrir o navegador visivel e reaproveitar cookies/sessao no perfil local `.browser/produtos`:
+
+```bash
+uv run python -m src.tools.atualizar_produtos_candidatos --browser --browser-visivel --limite-por-fonte 5
+```
+
 Para atualizar `data/produtos_candidatos.json` com o resultado do scraping:
 
 ```bash
