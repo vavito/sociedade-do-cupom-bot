@@ -12,3 +12,4 @@ build/
 *.egg-info/
 .env
 docs-infra/
+data/produtos_candidatos.json
