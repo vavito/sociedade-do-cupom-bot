@@ -63,6 +63,24 @@ SHOPEE_API_BASE_URL=https://open-api.affiliate.shopee.com.br/graphql
 
 O cliente assina cada requisicao com o header `Authorization` no formato exigido pela Shopee e expõe buscas de ofertas de produto, ofertas de loja e geracao de short link.
 
+## Cupons e produtos candidatos
+
+O modulo `cupom` extrai cupons da Amazon e do Mercado Livre no Thiago Rodrigo e permite cruzar esses cupons com produtos candidatos do dia.
+
+Nesta fase, os produtos candidatos podem ser carregados manualmente por JSON, usando o exemplo:
+
+```txt
+data/produtos_candidatos.example.json
+```
+
+O fluxo ainda gera apenas previews de posts, sem publicar automaticamente:
+
+```txt
+cupons do dia + produtos candidatos do dia -> match por loja/nicho/preco -> preview de post
+```
+
+O repost do mesmo produto respeita intervalo minimo de 6h no mesmo dia e bloqueia reposts apos 18h quando o produto ja saiu naquele dia.
+
 ## Supabase
 
 Use a connection string do Supabase com o driver async do projeto:
