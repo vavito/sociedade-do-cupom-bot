@@ -1,0 +1,80 @@
+[
+  {
+    "loja": "amazon",
+    "categoria": "headset_fone",
+    "url": "https://www.amazon.com.br/s?k=headset+gamer&crid=9138UHJMI032&qid=1782858572&rnid=16254006011&sprefix=%2Caps%2C183&ref=sr_nr_p_36_0_0&low-price=150&high-price=1000",
+    "preco_minimo": "100",
+    "preco_maximo": "1000",
+    "palavras_obrigatorias": ["headset"],
+    "palavras_bloqueadas": [],
+    "marcas_prioritarias": ["redragon", "razer", "logitech", "hyperx"],
+    "marcas_bloqueadas": [],
+    "limite_por_marca": 2,
+    "ignorar_patrocinados": true
+  },
+  {
+    "loja": "amazon",
+    "categoria": "teclado",
+    "url": "https://www.amazon.com.br/s?k=teclado+mecanico&rh=p_36%3A14500-100000%2Cp_72%3A17833786011&dc&crid=1QGHW1JNXJ3EA&qid=1782858730&rnid=5560472011&sprefix=teclado+%2Caps%2C245&ref=sr_nr_p_72_1&ds=v1%3AweDyZ9VQE%2BApp7xtMJndguaDLantQ6zqJKiSlImBc9Q",
+    "preco_minimo": "100",
+    "preco_maximo": "1000",
+    "palavras_obrigatorias": ["teclado", "mecanico"],
+    "palavras_bloqueadas": ["membrana"],
+    "marcas_prioritarias": ["redragon", "logitech", "hyperx", "razer"],
+    "marcas_bloqueadas": [],
+    "limite_por_marca": 2,
+    "ignorar_patrocinados": true
+  },
+  {
+    "loja": "amazon",
+    "categoria": "acessorio",
+    "url": "https://www.amazon.com.br/s?k=acessorio+computador+monitor&rh=p_36%3A-52000%2Cp_72%3A17833786011&dc&ds=v1%3AQ1Mk7%2FZNR5o9U4WNWd%2Bsy6VaFO4hnkXJSL2r3ssqlQ8&__mk_pt_BR=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=3RF7N355YHUPC&qid=1782859065&rnid=5560472011&sprefix=acessorio+computador+monito%2Caps%2C199&ref=sr_nr_p_72_1",
+    "preco_minimo": "0",
+    "preco_maximo": "200",
+    "palavras_obrigatorias": ["monitor"],
+    "palavras_bloqueadas": [],
+    "marcas_prioritarias": [],
+    "marcas_bloqueadas": [],
+    "limite_por_marca": 2,
+    "ignorar_patrocinados": true
+  },
+  {
+    "loja": "mercado_livre",
+    "categoria": "headset_fone",
+    "url": "https://lista.mercadolivre.com.br/headset-gamer_PriceRange_150BRL-1000BRL_NoIndex_True#applied_filter_id%3Dprice%26applied_filter_name%3DPre%C3%A7o%26applied_filter_order%3D16%26applied_value_id%3D150-1000%26applied_value_name%3DBRL150-BRL1000%26applied_value_order%3D4%26applied_value_results%3DUNKNOWN_RESULTS%26is_custom%3Dtrue",
+    "preco_minimo": "100",
+    "preco_maximo": "1000",
+    "palavras_obrigatorias": ["headset"],
+    "palavras_bloqueadas": [],
+    "marcas_prioritarias": ["redragon", "razer", "logitech", "hyperx"],
+    "marcas_bloqueadas": [],
+    "limite_por_marca": 2,
+    "ignorar_patrocinados": true
+  },
+  {
+    "loja": "mercado_livre",
+    "categoria": "teclado",
+    "url": "https://lista.mercadolivre.com.br/informatica/perifericos-pc/mouses-teclados/teclados/teclados-fisicos/mecanico/teclado-mecanico_PriceRange_150BRL-1000BRL_NoIndex_True#applied_filter_id%3Dprice%26applied_filter_name%3DPre%C3%A7o%26applied_filter_order%3D11%26applied_value_id%3D150-1000%26applied_value_name%3DBRL150-BRL1000%26applied_value_order%3D4%26applied_value_results%3DUNKNOWN_RESULTS%26is_custom%3Dtrue",
+    "preco_minimo": "100",
+    "preco_maximo": "1000",
+    "palavras_obrigatorias": ["teclado", "mecanico"],
+    "palavras_bloqueadas": ["membrana"],
+    "marcas_prioritarias": ["redragon", "logitech", "hyperx", "razer"],
+    "marcas_bloqueadas": [],
+    "limite_por_marca": 2,
+    "ignorar_patrocinados": true
+  },
+  {
+    "loja": "mercado_livre",
+    "categoria": "acessorio",
+    "url": "https://lista.mercadolivre.com.br/braco-articulado_PriceRange_0BRL-200BRL_NoIndex_True?sb=all_mercadolibre#applied_filter_id%3Dprice%26applied_filter_name%3DPre%C3%A7o%26applied_filter_order%3D15%26applied_value_id%3D*-200%26applied_value_name%3DBRL*-BRL200%26applied_value_order%3D4%26applied_value_results%3DUNKNOWN_RESULTS%26is_custom%3Dtrue",
+    "preco_minimo": "0",
+    "preco_maximo": "200",
+    "palavras_obrigatorias": ["braco"],
+    "palavras_bloqueadas": [],
+    "marcas_prioritarias": [],
+    "marcas_bloqueadas": [],
+    "limite_por_marca": 2,
+    "ignorar_patrocinados": true
+  }
+]

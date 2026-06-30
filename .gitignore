@@ -12,5 +12,6 @@ build/
 *.egg-info/
 .env
 docs-infra/
+data/fontes_produtos.json
 data/produtos_candidatos.json
 data/cupom_postagens.json
