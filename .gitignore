@@ -7,6 +7,7 @@ __pycache__/
 .coverage
 htmlcov/
 .venv/
+.browser/
 dist/
 build/
 *.egg-info/
