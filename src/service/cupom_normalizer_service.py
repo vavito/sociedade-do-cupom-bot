@@ -48,7 +48,10 @@ class CupomNormalizerService:
     @classmethod
     def _extrair_valor_minimo(cls, texto: str) -> Decimal | None:
         patterns = [
-            r"(?:acima|a partir|comprando acima|compras acima|em compras acima)\s+de\s+r\$\s*(\d+(?:[,.]\d+)?)",
+            (
+                r"(?:acima|a partir|comprando acima|compras acima|em compras acima)"
+                r"\s+de\s+r\$\s*(\d+(?:[,.]\d+)?)"
+            ),
             r"(?:mínimo|minimo)\s+de\s+r\$\s*(\d+(?:[,.]\d+)?)",
         ]
         return cls._extrair_primeiro_valor(texto, patterns)
