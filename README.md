@@ -105,10 +105,18 @@ Para simular o fluxo de publicacao sem enviar nada:
 uv run python -m src.tools.publicar_previews_cupom --limite 3
 ```
 
+Esse comando considera o historico local de posts em `data/cupom_postagens.json`, criado automaticamente apos envios confirmados. O arquivo fica ignorado no Git.
+
 Para publicar os previews gerados no canal configurado em `TELEGRAM_CHAT_ID`:
 
 ```bash
 uv run python -m src.tools.publicar_previews_cupom --limite 3 --confirmar-envio
+```
+
+Para testar com um historico separado:
+
+```bash
+uv run python -m src.tools.publicar_previews_cupom --historico data/cupom_postagens.teste.json
 ```
 
 O repost do mesmo produto respeita intervalo minimo de 6h no mesmo dia e bloqueia reposts apos 18h quando o produto ja saiu naquele dia.

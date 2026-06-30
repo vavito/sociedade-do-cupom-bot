@@ -1,12 +1,14 @@
 import argparse
 import asyncio
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 from src.config.settings import get_settings
+from src.dto.produto_candidato_dto import ProdutoCandidatoDTO
 from src.dto.telegram_message_dto import TelegramMessageDTO
 from src.external.cupom.thiago_rodrigo_client import ThiagoRodrigoCupomClient
 from src.external.telegram.telegram_client import TelegramClient
+from src.service.cupom_postagem_historico_service import CupomPostagemHistoricoService
 from src.service.cupom_postagem_service import CupomPostagemService
 from src.service.cupom_preview_runner_service import CupomPreviewRunnerService
 from src.service.cupom_scraper_service import CupomScraperService
@@ -19,12 +21,17 @@ def main() -> None:
 async def _main() -> None:
     args = _parse_args()
     data_referencia = _parse_date(args.data_referencia) if args.data_referencia else None
+    momento = datetime.now()
+    historico_service = CupomPostagemHistoricoService()
+    postagens_por_produto = historico_service.carregar_de_arquivo(args.historico)
     runner = CupomPreviewRunnerService(
         scraper_service=CupomScraperService(ThiagoRodrigoCupomClient()),
     )
     resultado = await runner.gerar_previews(
         caminho_produtos=args.produtos,
         data_referencia=data_referencia,
+        postagens_por_produto=postagens_por_produto,
+        agora=momento,
         limite=args.limite,
         filtrar_cupons=not args.sem_filtro,
     )
@@ -48,7 +55,17 @@ async def _main() -> None:
             chat_id=settings.telegram_chat_id,
         )
     )
-    resultados = await postagem_service.publicar_lote(mensagens)
+    resultados = []
+    historico_atualizado = postagens_por_produto
+    for match, mensagem in resultado.previews:
+        resultado_postagem = await postagem_service.publicar(mensagem)
+        resultados.append(resultado_postagem)
+        historico_atualizado = historico_service.registrar_postagem(
+            historico_atualizado,
+            _chave_produto(match.produto),
+            momento,
+        )
+        historico_service.salvar_em_arquivo(args.historico, historico_atualizado)
 
     print()
     print(f"Posts enviados: {len(resultados)}")
@@ -84,6 +101,12 @@ def _parse_args() -> argparse.Namespace:
         help="Caminho do JSON com produtos candidatos.",
     )
     parser.add_argument(
+        "--historico",
+        type=Path,
+        default=Path("data/cupom_postagens.json"),
+        help="Caminho do JSON local com historico de posts de cupom.",
+    )
+    parser.add_argument(
         "--limite",
         type=int,
         default=3,
@@ -111,6 +134,10 @@ def _parse_date(value: str) -> date:
         return date.fromisoformat(value)
     except ValueError as exc:
         raise argparse.ArgumentTypeError("Data precisa estar no formato YYYY-MM-DD.") from exc
+
+
+def _chave_produto(produto: ProdutoCandidatoDTO) -> str:
+    return f"{produto.loja}:{produto.external_id}"
 
 
 if __name__ == "__main__":
