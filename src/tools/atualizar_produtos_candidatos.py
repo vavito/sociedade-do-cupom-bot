@@ -5,10 +5,14 @@ from decimal import Decimal
 from pathlib import Path
 
 from src.dto.produto_candidato_dto import ProdutoCandidatoDTO
+from src.external.produto.browser_produto_client import BrowserProdutoClient
 from src.external.produto.marketplace_produto_client import MarketplaceProdutoClient
 from src.service.fonte_produto_seed_service import FonteProdutoSeedService
 from src.service.produto_candidato_catalogo_service import ProdutoCandidatoCatalogoService
-from src.service.produto_candidato_scraper_service import ProdutoCandidatoScraperService
+from src.service.produto_candidato_scraper_service import (
+    ProdutoCandidatoScraperService,
+    ProdutoHtmlClient,
+)
 
 
 def main() -> None:
@@ -21,7 +25,7 @@ async def _main() -> None:
     fonte_service = FonteProdutoSeedService()
     catalogo_service = ProdutoCandidatoCatalogoService()
     scraper_service = ProdutoCandidatoScraperService(
-        MarketplaceProdutoClient(),
+        _criar_client(args),
         catalogo_service=catalogo_service,
     )
 
@@ -59,6 +63,18 @@ def _combinar_produtos(
     for produto in encontrados:
         produtos_por_chave[catalogo_service.chave_produto(produto)] = produto
     return list(produtos_por_chave.values())
+
+
+def _criar_client(args: argparse.Namespace) -> ProdutoHtmlClient:
+    if args.browser:
+        return BrowserProdutoClient(
+            user_data_dir=args.browser_perfil,
+            headless=not args.browser_visivel,
+            timeout_ms=args.browser_timeout,
+            scrolls=args.browser_scrolls,
+            delay_ms=args.browser_delay,
+        )
+    return MarketplaceProdutoClient()
 
 
 def _imprimir_resultado(
@@ -118,6 +134,40 @@ def _parse_args() -> argparse.Namespace:
         "--salvar",
         action="store_true",
         help="Atualiza o arquivo de saida. Sem essa flag, roda em dry-run.",
+    )
+    parser.add_argument(
+        "--browser",
+        action="store_true",
+        help="Busca as fontes usando Playwright/Chromium em vez de HTTP direto.",
+    )
+    parser.add_argument(
+        "--browser-visivel",
+        action="store_true",
+        help="Abre o navegador visivel. Util para primeiro login/cookies e debug.",
+    )
+    parser.add_argument(
+        "--browser-perfil",
+        type=Path,
+        default=Path(".browser/produtos"),
+        help="Diretorio local do perfil persistente do Chromium.",
+    )
+    parser.add_argument(
+        "--browser-timeout",
+        type=int,
+        default=45_000,
+        help="Timeout de navegacao do browser em milissegundos.",
+    )
+    parser.add_argument(
+        "--browser-scrolls",
+        type=int,
+        default=3,
+        help="Quantidade de rolagens antes de capturar o HTML renderizado.",
+    )
+    parser.add_argument(
+        "--browser-delay",
+        type=int,
+        default=800,
+        help="Espera em milissegundos entre rolagens do browser.",
     )
     return parser.parse_args()
 
