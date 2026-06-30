@@ -45,8 +45,8 @@ def test_gera_preview_de_post_de_cupom_com_produto() -> None:
     assert mensagem.image_url == "https://example.com/monitor.jpg"
     assert "Cupom Amazon: CRAQUE10" in mensagem.caption
     assert "10% OFF, acima de R$ 250, limite R$ 50" in mensagem.caption
-    assert "preco estimado R$ 949,90" in mensagem.caption
-    assert "Produto sugerido: Monitor gamer LG 24 polegadas" in mensagem.caption
+    assert "preco estimado" not in mensagem.caption
+    assert "Produto sugerido" not in mensagem.caption
     assert "Ative por aqui para ajudar o grupo: https://www.amazon.com.br/produto" in (
         mensagem.caption
     )

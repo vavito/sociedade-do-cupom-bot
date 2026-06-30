@@ -14,7 +14,6 @@ class CupomPostPreviewService:
             f"\U0001f39f\ufe0f Cupom {self._nome_loja(cupom.loja)}: {cupom.codigo or cupom.titulo}",
             f"\U0001f4b5 {self._formatar_beneficio(match)}",
             "",
-            f"\U0001f6d2 Produto sugerido: {produto.titulo}",
             f"\u2b50\ufe0f Ative por aqui para ajudar o grupo: {produto.url}",
         ]
 
@@ -44,7 +43,6 @@ class CupomPostPreviewService:
         if cupom.limite_desconto:
             partes.append(f"limite {self._formatar_moeda(cupom.limite_desconto)}")
 
-        partes.append(f"preco estimado {self._formatar_moeda(match.preco_estimado)}")
         return ", ".join(partes)
 
     @staticmethod
