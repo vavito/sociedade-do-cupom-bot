@@ -81,6 +81,26 @@ cp data/produtos_candidatos.example.json data/produtos_candidatos.json
 
 Esse arquivo real fica ignorado no Git, entao pode receber links, precos e produtos do dia.
 
+As fontes de scraping ficam em outro JSON local. Copie o exemplo com URLs de Amazon e Mercado Livre:
+
+```bash
+cp data/fontes_produtos.example.json data/fontes_produtos.json
+```
+
+Para buscar produtos candidatos dessas fontes sem salvar:
+
+```bash
+uv run python -m src.tools.atualizar_produtos_candidatos --limite-por-fonte 5
+```
+
+Para atualizar `data/produtos_candidatos.json` com o resultado do scraping:
+
+```bash
+uv run python -m src.tools.atualizar_produtos_candidatos --limite-por-fonte 5 --salvar
+```
+
+Use `--manter-existentes` quando quiser preservar produtos cadastrados manualmente e substituir apenas duplicados encontrados pelo scraper.
+
 Voce tambem pode gerenciar esse JSON por comando:
 
 ```bash
