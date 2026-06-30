@@ -1,19 +1,23 @@
 import logging
 from datetime import date
+from typing import Protocol
 
 from src.dto.fonte_produto_dto import FonteProdutoDTO
 from src.dto.produto_candidato_dto import ProdutoCandidatoDTO
-from src.external.produto.marketplace_produto_client import MarketplaceProdutoClient
 from src.mapper.produto_candidato_marketplace_mapper import mapear_produtos_marketplace
 from src.service.produto_candidato_catalogo_service import ProdutoCandidatoCatalogoService
 
 logger = logging.getLogger(__name__)
 
 
+class ProdutoHtmlClient(Protocol):
+    async def buscar_html(self, url: str) -> str: ...
+
+
 class ProdutoCandidatoScraperService:
     def __init__(
         self,
-        client: MarketplaceProdutoClient,
+        client: ProdutoHtmlClient,
         catalogo_service: ProdutoCandidatoCatalogoService | None = None,
     ) -> None:
         self.client = client
