@@ -81,6 +81,24 @@ cp data/produtos_candidatos.example.json data/produtos_candidatos.json
 
 Esse arquivo real fica ignorado no Git, entao pode receber links, precos e produtos do dia.
 
+Voce tambem pode gerenciar esse JSON por comando:
+
+```bash
+uv run python -m src.tools.produtos_candidatos listar
+```
+
+Para adicionar um produto candidato:
+
+```bash
+uv run python -m src.tools.produtos_candidatos adicionar --loja amazon --external-id amazon-monitor-lg-24 --titulo "Monitor gamer LG 24 polegadas 144Hz" --url "https://www.amazon.com.br/produto" --preco 999.90 --marca LG
+```
+
+Para remover:
+
+```bash
+uv run python -m src.tools.produtos_candidatos remover --loja amazon --external-id amazon-monitor-lg-24
+```
+
 O fluxo gera previews de posts e so publica quando o comando de envio recebe confirmacao explicita:
 
 ```txt
