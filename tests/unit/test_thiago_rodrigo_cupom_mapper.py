@@ -25,6 +25,7 @@ def test_mapear_cupons_thiago_rodrigo_extrai_codigo_e_metadados() -> None:
     assert cupons[0].data == date(2026, 6, 29)
     assert cupons[0].tipo == "Cupom"
     assert str(cupons[0].link_resgate) == "https://www.amazon.com.br/?tag=thiagorodrigosp-20"
+    assert cupons[1].loja == LojaCupom.MERCADO_LIVRE
 
 
 def test_cupom_mapeado_pode_ser_normalizado() -> None:

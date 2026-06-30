@@ -44,6 +44,7 @@ def _mapear_bloco_cupom(bloco: str, loja: LojaCupom, source_url: str) -> CupomDT
         return None
 
     descricao = _extrair_texto_por_classe(bloco, "coupon-description")
+    loja_inferida = _inferir_loja(titulo, descricao) or loja
     codigo = _extrair_atributo(bloco, "data-full-code")
     link_resgate = _extrair_atributo(bloco, "data-target-url")
     data_cupom = _extrair_data(bloco)
@@ -51,7 +52,7 @@ def _mapear_bloco_cupom(bloco: str, loja: LojaCupom, source_url: str) -> CupomDT
 
     return CupomDTO(
         fonte=FONTE_THIAGO_RODRIGO,
-        loja=loja,
+        loja=loja_inferida,
         titulo=titulo,
         descricao=descricao,
         codigo=codigo,
@@ -63,6 +64,19 @@ def _mapear_bloco_cupom(bloco: str, loja: LojaCupom, source_url: str) -> CupomDT
             "html_snippet": bloco[:1500],
         },
     )
+
+
+def _inferir_loja(titulo: str, descricao: str | None) -> LojaCupom | None:
+    texto = f"{titulo} {descricao or ''}".casefold()
+    if "mercado livre" in texto:
+        return LojaCupom.MERCADO_LIVRE
+    if "amazon" in texto:
+        return LojaCupom.AMAZON
+    if "kabum" in texto or "ka bu m" in texto:
+        return LojaCupom.KABUM
+    if "shopee" in texto:
+        return LojaCupom.SHOPEE
+    return None
 
 
 def _extrair_texto_por_classe(bloco: str, classe: str) -> str | None:

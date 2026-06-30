@@ -37,4 +37,4 @@ async def test_buscar_cupons_amazon_pode_retornar_sem_filtrar() -> None:
         service = CupomScraperService(ThiagoRodrigoCupomClient(http_client))
         cupons = await service.buscar_cupons_amazon(filtrar=False)
 
-    assert [cupom.codigo for cupom in cupons] == ["CRAQUE10", "HORADOGOL"]
+    assert [cupom.codigo for cupom in cupons] == ["CRAQUE10"]

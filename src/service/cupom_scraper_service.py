@@ -42,5 +42,6 @@ class CupomScraperService:
         filtrar: bool,
     ) -> list[CupomDTO]:
         cupons = mapear_cupons_thiago_rodrigo(html, loja, source_url)
+        cupons = [cupom for cupom in cupons if cupom.loja == loja]
         normalizados = self.normalizer.normalizar_lista(cupons)
         return self.filtro.filtrar(normalizados) if filtrar else normalizados
