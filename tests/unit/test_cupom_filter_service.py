@@ -38,6 +38,16 @@ def test_aceita_cupom_tech_do_mercado_livre() -> None:
     assert CupomFilterService().cupom_elegivel(cupom)
 
 
+def test_aceita_cupom_de_acessorio_do_nicho() -> None:
+    cupom = criar_cupom(
+        LojaCupom.MERCADO_LIVRE,
+        "Cupom para suporte articulado de monitor",
+        categoria_hint=None,
+    )
+
+    assert CupomFilterService().cupom_elegivel(cupom)
+
+
 def test_bloqueia_cupom_fora_do_nicho() -> None:
     cupom = criar_cupom(
         LojaCupom.MERCADO_LIVRE,
