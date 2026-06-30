@@ -53,6 +53,9 @@ class CupomProdutoMatchService:
         if cupom.loja != produto.loja:
             return None
 
+        if cupom.data and produto.data_referencia and cupom.data != produto.data_referencia:
+            return None
+
         if cupom.valor_minimo and produto.preco < cupom.valor_minimo:
             return None
 

@@ -76,6 +76,15 @@ def test_rejeita_loja_diferente() -> None:
     assert match is None
 
 
+def test_rejeita_datas_de_referencia_diferentes() -> None:
+    produto = criar_produto()
+    produto = produto.model_copy(update={"data_referencia": date(2026, 6, 28)})
+
+    match = CupomProdutoMatchService().gerar_match(criar_cupom(), produto)
+
+    assert match is None
+
+
 def test_rejeita_categoria_incompativel() -> None:
     match = CupomProdutoMatchService().gerar_match(
         criar_cupom(categoria_hint="smartphones", valor_minimo=None),
