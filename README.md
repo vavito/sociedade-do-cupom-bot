@@ -73,10 +73,30 @@ Nesta fase, os produtos candidatos podem ser carregados manualmente por JSON, us
 data/produtos_candidatos.example.json
 ```
 
+Crie o arquivo local de trabalho copiando o exemplo:
+
+```bash
+cp data/produtos_candidatos.example.json data/produtos_candidatos.json
+```
+
+Esse arquivo real fica ignorado no Git, entao pode receber links, precos e produtos do dia.
+
 O fluxo ainda gera apenas previews de posts, sem publicar automaticamente:
 
 ```txt
 cupons do dia + produtos candidatos do dia -> match por loja/nicho/preco -> preview de post
+```
+
+Para testar a geracao dos posts sem enviar nada ao Telegram:
+
+```bash
+uv run python -m src.tools.gerar_previews_cupom --limite 5
+```
+
+Para testar uma data especifica:
+
+```bash
+uv run python -m src.tools.gerar_previews_cupom --data-referencia 2026-06-30
 ```
 
 O repost do mesmo produto respeita intervalo minimo de 6h no mesmo dia e bloqueia reposts apos 18h quando o produto ja saiu naquele dia.
