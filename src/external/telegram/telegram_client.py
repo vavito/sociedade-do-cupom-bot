@@ -1,4 +1,6 @@
+from pathlib import Path
 from typing import Any, cast
+from urllib.parse import urlparse
 
 import httpx
 
@@ -22,8 +24,19 @@ class TelegramClient:
     ) -> str | None:
         target_chat_id = self._resolver_chat_id(chat_id)
 
-        payload = {"chat_id": target_chat_id, "photo": image_url, "caption": caption}
-        result = await self._post("sendPhoto", payload)
+        payload = {"chat_id": target_chat_id, "caption": caption}
+        local_path = self._resolver_arquivo_local(image_url)
+        if local_path:
+            with local_path.open("rb") as image_file:
+                result = await self._post(
+                    "sendPhoto",
+                    payload,
+                    files={"photo": (local_path.name, image_file)},
+                )
+        else:
+            payload["photo"] = image_url
+            result = await self._post("sendPhoto", payload)
+
         message_id = result.get("message_id")
         return str(message_id) if message_id is not None else None
 
@@ -47,16 +60,21 @@ class TelegramClient:
             return [update for update in result if isinstance(update, dict)]
         return []
 
-    async def _post(self, method: str, payload: dict[str, Any]) -> Any:
+    async def _post(
+        self,
+        method: str,
+        payload: dict[str, Any],
+        files: dict[str, Any] | None = None,
+    ) -> Any:
         if not self.bot_token:
             raise RuntimeError("TELEGRAM_BOT_TOKEN precisa estar configurado.")
 
         url = f"https://api.telegram.org/bot{self.bot_token}/{method}"
         if self.http_client is not None:
-            response = await self.http_client.post(url, data=payload)
+            response = await self.http_client.post(url, data=payload, files=files)
         else:
             async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.post(url, data=payload)
+                response = await client.post(url, data=payload, files=files)
 
         payload = cast(dict[str, Any], response.json())
         if response.status_code >= 400 or not payload.get("ok", False):
@@ -64,6 +82,15 @@ class TelegramClient:
             raise RuntimeError(f"Erro Telegram: {response.status_code} - {description}")
 
         return payload.get("result", {})
+
+    @staticmethod
+    def _resolver_arquivo_local(image_url: str) -> Path | None:
+        scheme = urlparse(image_url).scheme
+        if scheme in {"http", "https"}:
+            return None
+
+        path = Path(image_url)
+        return path if path.is_file() else None
 
     def _resolver_chat_id(self, chat_id: str | None) -> str:
         target_chat_id = chat_id or self.chat_id

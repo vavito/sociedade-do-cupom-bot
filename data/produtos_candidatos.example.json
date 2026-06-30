@@ -1,0 +1,24 @@
+[
+  {
+    "loja": "amazon",
+    "external_id": "amazon-monitor-lg-24",
+    "titulo": "Monitor gamer LG 24 polegadas 144Hz",
+    "url": "https://www.amazon.com.br/",
+    "preco": "999.90",
+    "imagem_url": null,
+    "categoria": "monitor",
+    "marca": "LG",
+    "comissao_percentual": "4"
+  },
+  {
+    "loja": "mercado_livre",
+    "external_id": "ml-ryzen-5700",
+    "titulo": "Processador AMD Ryzen 7 5700 AM4",
+    "url": "https://www.mercadolivre.com.br/",
+    "preco": "1099.90",
+    "imagem_url": null,
+    "categoria": "processador",
+    "marca": "AMD",
+    "comissao_percentual": "5"
+  }
+]
