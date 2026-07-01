@@ -7,8 +7,9 @@
     "preco_maximo": "1000",
     "palavras_obrigatorias": ["headset"],
     "palavras_bloqueadas": [],
-    "marcas_prioritarias": ["redragon", "razer", "logitech", "hyperx"],
+    "marcas_prioritarias": ["havit", "jbl", "redragon", "razer", "logitech", "hyperx"],
     "marcas_bloqueadas": [],
+    "exigir_marca_prioritaria": true,
     "limite_por_marca": 2,
     "ignorar_patrocinados": true
   },
@@ -20,8 +21,9 @@
     "preco_maximo": "1000",
     "palavras_obrigatorias": ["teclado", "mecanico"],
     "palavras_bloqueadas": ["membrana"],
-    "marcas_prioritarias": ["redragon", "logitech", "hyperx", "razer"],
+    "marcas_prioritarias": ["aula", "redragon", "logitech", "hyperx", "razer"],
     "marcas_bloqueadas": [],
+    "exigir_marca_prioritaria": true,
     "limite_por_marca": 2,
     "ignorar_patrocinados": true
   },
@@ -35,6 +37,7 @@
     "palavras_bloqueadas": [],
     "marcas_prioritarias": [],
     "marcas_bloqueadas": [],
+    "exigir_marca_prioritaria": false,
     "limite_por_marca": 2,
     "ignorar_patrocinados": true
   },
@@ -46,8 +49,9 @@
     "preco_maximo": "1000",
     "palavras_obrigatorias": ["headset"],
     "palavras_bloqueadas": [],
-    "marcas_prioritarias": ["redragon", "razer", "logitech", "hyperx"],
+    "marcas_prioritarias": ["havit", "jbl", "redragon", "razer", "logitech", "hyperx"],
     "marcas_bloqueadas": [],
+    "exigir_marca_prioritaria": true,
     "limite_por_marca": 2,
     "ignorar_patrocinados": true
   },
@@ -59,8 +63,9 @@
     "preco_maximo": "1000",
     "palavras_obrigatorias": ["teclado", "mecanico"],
     "palavras_bloqueadas": ["membrana"],
-    "marcas_prioritarias": ["redragon", "logitech", "hyperx", "razer"],
+    "marcas_prioritarias": ["aula", "redragon", "logitech", "hyperx", "razer"],
     "marcas_bloqueadas": [],
+    "exigir_marca_prioritaria": true,
     "limite_por_marca": 2,
     "ignorar_patrocinados": true
   },
@@ -74,6 +79,7 @@
     "palavras_bloqueadas": [],
     "marcas_prioritarias": [],
     "marcas_bloqueadas": [],
+    "exigir_marca_prioritaria": false,
     "limite_por_marca": 2,
     "ignorar_patrocinados": true
   }

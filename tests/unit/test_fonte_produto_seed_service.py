@@ -21,6 +21,7 @@ def test_carregar_fontes_de_produtos_de_json(tmp_path) -> None:  # type: ignore[
                     "palavras_obrigatorias": ["teclado", "mecanico"],
                     "palavras_bloqueadas": ["membrana"],
                     "marcas_prioritarias": ["redragon"],
+                    "exigir_marca_prioritaria": True,
                     "limite_por_marca": 2,
                 }
             ]
@@ -38,6 +39,7 @@ def test_carregar_fontes_de_produtos_de_json(tmp_path) -> None:  # type: ignore[
     assert fontes[0].palavras_obrigatorias == ["teclado", "mecanico"]
     assert fontes[0].palavras_bloqueadas == ["membrana"]
     assert fontes[0].marcas_prioritarias == ["redragon"]
+    assert fontes[0].exigir_marca_prioritaria is True
     assert fontes[0].limite_por_marca == 2
     assert fontes[0].ignorar_patrocinados is True
 

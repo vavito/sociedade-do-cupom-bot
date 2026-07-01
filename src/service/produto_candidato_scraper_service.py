@@ -39,6 +39,13 @@ class ProdutoCandidatoScraperService:
                 continue
 
             produtos = mapear_produtos_marketplace(html, fonte)[:limite_por_fonte]
+            if not produtos:
+                logger.warning(
+                    "Fonte nao retornou produtos (%s): %s",
+                    self._motivo_sem_produtos(html),
+                    fonte.url,
+                )
+
             for produto in produtos:
                 if data_referencia is not None:
                     produto = produto.model_copy(update={"data_referencia": data_referencia})
@@ -48,3 +55,18 @@ class ProdutoCandidatoScraperService:
                 )
 
         return list(produtos_por_chave.values())
+
+    @staticmethod
+    def _motivo_sem_produtos(html: str) -> str:
+        texto = html.casefold()
+        indicadores_bloqueio = [
+            "seguridad",
+            "captcha",
+            "robot",
+            "automated",
+            "hubo un error accediendo",
+            "service unavailable",
+        ]
+        if any(indicador in texto for indicador in indicadores_bloqueio):
+            return "possivel bloqueio ou pagina de seguranca"
+        return "nenhum card parseavel"

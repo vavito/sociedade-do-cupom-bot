@@ -119,6 +119,16 @@ uv run python -m src.tools.atualizar_produtos_candidatos --limite-por-fonte 5 --
 
 Use `--manter-existentes` quando quiser preservar produtos cadastrados manualmente e substituir apenas duplicados encontrados pelo scraper.
 
+Em `data/fontes_produtos.json`, fontes de categorias sensiveis como headset e teclado podem usar:
+
+```json
+"marcas_prioritarias": ["havit", "jbl", "redragon", "logitech"],
+"exigir_marca_prioritaria": true,
+"limite_por_marca": 2
+```
+
+Isso evita produtos genericos demais e limita repeticao de uma mesma marca dentro da categoria.
+
 Voce tambem pode gerenciar esse JSON por comando:
 
 ```bash

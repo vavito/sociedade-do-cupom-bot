@@ -8,11 +8,20 @@ from playwright.async_api import (
     async_playwright,
 )
 from playwright.async_api import (
+    Error as PlaywrightError,
+)
+from playwright.async_api import (
     TimeoutError as PlaywrightTimeoutError,
 )
 
 
 class BrowserProdutoClient:
+    USER_AGENT = (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/126.0.0.0 Safari/537.36"
+    )
+
     def __init__(
         self,
         user_data_dir: str | Path = ".browser/produtos",
@@ -36,11 +45,13 @@ class BrowserProdutoClient:
                 locale="pt-BR",
                 timezone_id="America/Sao_Paulo",
                 viewport={"width": 1366, "height": 768},
+                user_agent=self.USER_AGENT,
+                extra_http_headers={"Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7"},
             )
             try:
                 page = await context.new_page()
                 await self._navegar(page, url)
-                return await page.content()
+                return await self._obter_conteudo(page)
             finally:
                 await self._fechar_contexto(context)
 
@@ -50,6 +61,16 @@ class BrowserProdutoClient:
         with suppress(PlaywrightTimeoutError):
             await page.wait_for_load_state("networkidle", timeout=min(self.timeout_ms, 10_000))
         await self._rolar_pagina(page)
+
+    async def _obter_conteudo(self, page: Page) -> str:
+        for tentativa in range(3):
+            try:
+                return await page.content()
+            except PlaywrightError:
+                if tentativa == 2:
+                    raise
+                await page.wait_for_timeout(self.delay_ms)
+        return await page.content()
 
     async def _rolar_pagina(self, page: Page) -> None:
         for _ in range(self.scrolls):

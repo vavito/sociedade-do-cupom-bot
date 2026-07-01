@@ -15,5 +15,6 @@ class FonteProdutoDTO(BaseModel):
     palavras_bloqueadas: list[str] = Field(default_factory=list)
     marcas_prioritarias: list[str] = Field(default_factory=list)
     marcas_bloqueadas: list[str] = Field(default_factory=list)
+    exigir_marca_prioritaria: bool = False
     limite_por_marca: int | None = Field(default=None, gt=0)
     ignorar_patrocinados: bool = True
