@@ -151,3 +151,20 @@ def test_rejeita_produto_sem_marca_quando_fonte_exige_marca_prioritaria() -> Non
     )
 
     assert [produto.external_id for produto in produtos] == ["amazon-b002"]
+
+
+def test_filtro_de_palavras_ignora_acentos_reais() -> None:
+    html = """
+    <div data-component-type="s-search-result" data-asin="B004">
+      <h2><span>Teclado Mecânico Redragon Kumara</span></h2>
+      <a href="/dp/B004"></a>
+      <span class="a-offscreen">R$ 249,90</span>
+    </div>
+    """
+
+    produtos = mapear_produtos_marketplace(
+        html,
+        criar_fonte(LojaCupom.AMAZON, "teclado", ["teclado", "mecanico"]),
+    )
+
+    assert [produto.external_id for produto in produtos] == ["amazon-b004"]
