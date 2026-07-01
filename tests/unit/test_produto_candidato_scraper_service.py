@@ -1,6 +1,6 @@
+import logging
 from datetime import date
 from decimal import Decimal
-import logging
 
 from src.dto.cupom_dto import LojaCupom
 from src.dto.fonte_produto_dto import FonteProdutoDTO

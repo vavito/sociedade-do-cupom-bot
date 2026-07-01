@@ -4,9 +4,11 @@ from pathlib import Path
 
 from playwright.async_api import (
     BrowserContext,
-    Error as PlaywrightError,
     Page,
     async_playwright,
+)
+from playwright.async_api import (
+    Error as PlaywrightError,
 )
 from playwright.async_api import (
     TimeoutError as PlaywrightTimeoutError,
