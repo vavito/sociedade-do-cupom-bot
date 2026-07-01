@@ -87,6 +87,8 @@ As fontes de scraping ficam em outro JSON local. Copie o exemplo com URLs de Ama
 cp data/fontes_produtos.example.json data/fontes_produtos.json
 ```
 
+O arquivo `data/fontes_produtos.example.json` versiona as URLs base de cada categoria do nicho. O bot usa o arquivo local `data/fontes_produtos.json`, que fica ignorado no Git para voce ajustar URLs e filtros sem afetar o repositorio.
+
 Para buscar produtos candidatos dessas fontes sem salvar:
 
 ```bash
