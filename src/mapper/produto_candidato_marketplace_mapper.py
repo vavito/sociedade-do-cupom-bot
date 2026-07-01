@@ -1,6 +1,7 @@
 import hashlib
 import html
 import re
+import unicodedata
 from decimal import Decimal, InvalidOperation
 from urllib.parse import urljoin
 
@@ -243,5 +244,15 @@ def _limpar_texto(texto_html: str) -> str:
 
 
 def _normalizar(texto: str) -> str:
-    substituicoes = str.maketrans("áàãâéêíóôõúç", "aaaaeeiooouc")
-    return texto.casefold().translate(substituicoes)
+    texto_corrigido = _corrigir_mojibake(texto)
+    texto_decomposto = unicodedata.normalize("NFKD", texto_corrigido.casefold())
+    return "".join(
+        caractere for caractere in texto_decomposto if not unicodedata.combining(caractere)
+    )
+
+
+def _corrigir_mojibake(texto: str) -> str:
+    try:
+        return texto.encode("latin1").decode("utf-8")
+    except UnicodeError:
+        return texto

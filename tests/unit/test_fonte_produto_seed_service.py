@@ -1,10 +1,12 @@
 import json
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 
 from src.dto.cupom_dto import LojaCupom
 from src.service.fonte_produto_seed_service import FonteProdutoSeedService
+from src.service.nicho_produto_service import NichoProduto
 
 
 def test_carregar_fontes_de_produtos_de_json(tmp_path) -> None:  # type: ignore[no-untyped-def]
@@ -50,3 +52,20 @@ def test_rejeita_json_de_fontes_que_nao_e_lista(tmp_path) -> None:  # type: igno
 
     with pytest.raises(ValueError, match="precisa conter uma lista"):
         FonteProdutoSeedService().carregar_de_arquivo(caminho)
+
+
+def test_exemplo_de_fontes_cobre_nichos_focados() -> None:
+    fontes = FonteProdutoSeedService().carregar_de_arquivo(
+        Path("data/fontes_produtos.example.json")
+    )
+    categorias = {fonte.categoria for fonte in fontes}
+    lojas_por_categoria = {
+        categoria: {fonte.loja for fonte in fontes if fonte.categoria == categoria}
+        for categoria in categorias
+    }
+
+    assert categorias == {nicho.value for nicho in NichoProduto}
+    assert all(
+        lojas == {LojaCupom.AMAZON, LojaCupom.MERCADO_LIVRE}
+        for lojas in lojas_por_categoria.values()
+    )
