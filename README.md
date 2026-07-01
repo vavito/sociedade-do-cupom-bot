@@ -95,6 +95,12 @@ Para buscar produtos candidatos dessas fontes sem salvar:
 uv run python -m src.tools.atualizar_produtos_candidatos --limite-por-fonte 5
 ```
 
+Para diagnosticar cada fonte antes de salvar produtos, mostrando quantos cards foram encontrados, quantos produtos passaram nos filtros e os principais motivos de rejeicao:
+
+```bash
+uv run python -m src.tools.diagnosticar_fontes_produtos --browser --limite-por-fonte 3
+```
+
 Se HTTP direto retornar bloqueio ou HTML incompleto, instale o Chromium do Playwright:
 
 ```bash
