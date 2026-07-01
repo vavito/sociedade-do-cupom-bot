@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from playwright.async_api import Error as PlaywrightError
+
 from src.external.produto.browser_produto_client import BrowserProdutoClient
 
 
@@ -20,6 +22,21 @@ class FakePage:
         self.waits.append(timeout_ms)
 
 
+class FakeContentPage:
+    def __init__(self) -> None:
+        self.calls = 0
+        self.waits: list[int] = []
+
+    async def content(self) -> str:
+        self.calls += 1
+        if self.calls == 1:
+            raise PlaywrightError("page is navigating")
+        return "<html>ok</html>"
+
+    async def wait_for_timeout(self, timeout_ms: int) -> None:
+        self.waits.append(timeout_ms)
+
+
 async def test_rolar_pagina_respeita_quantidade_de_scrolls() -> None:
     client = BrowserProdutoClient(scrolls=2, delay_ms=150)
     page = FakePage()
@@ -30,6 +47,17 @@ async def test_rolar_pagina_respeita_quantidade_de_scrolls() -> None:
     assert page.waits == [150, 150]
 
 
+async def test_obter_conteudo_tenta_novamente_quando_pagina_ainda_navega() -> None:
+    client = BrowserProdutoClient(delay_ms=250)
+    page = FakeContentPage()
+
+    html = await client._obter_conteudo(page)  # type: ignore[arg-type]
+
+    assert html == "<html>ok</html>"
+    assert page.calls == 2
+    assert page.waits == [250]
+
+
 def test_browser_client_usa_perfil_persistente_local(tmp_path: Path) -> None:
     user_data_dir = tmp_path / "browser"
     client = BrowserProdutoClient(user_data_dir=user_data_dir, headless=False)
@@ -37,3 +65,5 @@ def test_browser_client_usa_perfil_persistente_local(tmp_path: Path) -> None:
     assert client.user_data_dir == user_data_dir
     assert client.headless is False
     assert client.timeout_ms == 45_000
+    assert "Chrome/" in client.USER_AGENT
+    assert "HeadlessChrome" not in client.USER_AGENT
