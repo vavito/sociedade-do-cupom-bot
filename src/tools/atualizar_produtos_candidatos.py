@@ -4,7 +4,6 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-from src.dto.produto_candidato_dto import ProdutoCandidatoDTO
 from src.external.produto.browser_produto_client import BrowserProdutoClient
 from src.external.produto.marketplace_produto_client import MarketplaceProdutoClient
 from src.service.fonte_produto_seed_service import FonteProdutoSeedService
@@ -12,6 +11,10 @@ from src.service.produto_candidato_catalogo_service import ProdutoCandidatoCatal
 from src.service.produto_candidato_scraper_service import (
     ProdutoCandidatoScraperService,
     ProdutoHtmlClient,
+)
+from src.service.produto_candidato_update_service import (
+    ProdutoCandidatoUpdateResultado,
+    ProdutoCandidatoUpdateService,
 )
 
 
@@ -28,41 +31,29 @@ async def _main() -> None:
         _criar_client(args),
         catalogo_service=catalogo_service,
     )
+    update_service = ProdutoCandidatoUpdateService(
+        scraper_service=scraper_service,
+        fonte_service=fonte_service,
+        catalogo_service=catalogo_service,
+    )
 
-    fontes = fonte_service.carregar_de_arquivo(args.fontes)
-    encontrados = await scraper_service.buscar_produtos(
-        fontes,
+    resultado = await update_service.atualizar(
+        caminho_fontes=args.fontes,
+        caminho_saida=args.saida,
         data_referencia=data_referencia,
         limite_por_fonte=args.limite_por_fonte,
-    )
-    produtos_finais = (
-        _combinar_produtos(catalogo_service.listar(args.saida), encontrados, catalogo_service)
-        if args.manter_existentes
-        else encontrados
+        manter_existentes=args.manter_existentes,
+        salvar=args.salvar,
     )
 
-    _imprimir_resultado(len(fontes), encontrados, produtos_finais)
+    _imprimir_resultado(resultado)
     if not args.salvar:
         print()
         print("Dry-run concluido. Use --salvar para atualizar o JSON de produtos candidatos.")
         return
 
-    catalogo_service.salvar(args.saida, produtos_finais)
     print()
     print(f"Arquivo atualizado: {args.saida}")
-
-
-def _combinar_produtos(
-    existentes: list[ProdutoCandidatoDTO],
-    encontrados: list[ProdutoCandidatoDTO],
-    catalogo_service: ProdutoCandidatoCatalogoService,
-) -> list[ProdutoCandidatoDTO]:
-    produtos_por_chave = {
-        catalogo_service.chave_produto(produto): produto for produto in existentes
-    }
-    for produto in encontrados:
-        produtos_por_chave[catalogo_service.chave_produto(produto)] = produto
-    return list(produtos_por_chave.values())
 
 
 def _criar_client(args: argparse.Namespace) -> ProdutoHtmlClient:
@@ -77,16 +68,12 @@ def _criar_client(args: argparse.Namespace) -> ProdutoHtmlClient:
     return MarketplaceProdutoClient()
 
 
-def _imprimir_resultado(
-    total_fontes: int,
-    encontrados: list[ProdutoCandidatoDTO],
-    produtos_finais: list[ProdutoCandidatoDTO],
-) -> None:
-    print(f"Fontes carregadas: {total_fontes}")
-    print(f"Produtos encontrados: {len(encontrados)}")
-    print(f"Produtos finais: {len(produtos_finais)}")
+def _imprimir_resultado(resultado: ProdutoCandidatoUpdateResultado) -> None:
+    print(f"Fontes carregadas: {resultado.total_fontes}")
+    print(f"Produtos encontrados: {len(resultado.encontrados)}")
+    print(f"Produtos finais: {len(resultado.produtos_finais)}")
 
-    for produto in produtos_finais:
+    for produto in resultado.produtos_finais:
         print(
             " | ".join(
                 [

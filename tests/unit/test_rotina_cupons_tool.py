@@ -4,15 +4,15 @@ from pathlib import Path
 
 from src.external.produto.browser_produto_client import BrowserProdutoClient
 from src.external.produto.marketplace_produto_client import MarketplaceProdutoClient
-from src.tools.atualizar_produtos_candidatos import _criar_client, _parse_date
+from src.tools.rotina_cupons import _criar_produto_client, _parse_date
 
 
 def test_parse_date() -> None:
-    assert _parse_date("2026-06-30") == date(2026, 6, 30)
+    assert _parse_date("2026-07-01") == date(2026, 7, 1)
 
 
-def test_criar_client_http_por_padrao() -> None:
-    client = _criar_client(
+def test_criar_produto_client_http_por_padrao() -> None:
+    client = _criar_produto_client(
         Namespace(
             browser=False,
         )
@@ -21,8 +21,8 @@ def test_criar_client_http_por_padrao() -> None:
     assert isinstance(client, MarketplaceProdutoClient)
 
 
-def test_criar_client_browser_quando_solicitado() -> None:
-    client = _criar_client(
+def test_criar_produto_client_browser_quando_solicitado() -> None:
+    client = _criar_produto_client(
         Namespace(
             browser=True,
             browser_perfil=Path(".browser/teste"),
