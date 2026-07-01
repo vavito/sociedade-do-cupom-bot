@@ -1,5 +1,6 @@
 from datetime import date
 from decimal import Decimal
+import logging
 
 from src.dto.cupom_dto import LojaCupom
 from src.dto.fonte_produto_dto import FonteProdutoDTO
@@ -73,3 +74,16 @@ async def test_deduplica_produtos_de_fontes_repetidas() -> None:
     )
 
     assert len(produtos) == 1
+
+
+async def test_avisa_quando_fonte_parece_bloqueada(caplog) -> None:  # type: ignore[no-untyped-def]
+    html = "<html><title>Seguridad — Mercado Libre</title><body>captcha</body></html>"
+    service = ProdutoCandidatoScraperService(
+        FakeMarketplaceProdutoClient({"https://example.com/headset": html})  # type: ignore[arg-type]
+    )
+
+    with caplog.at_level(logging.WARNING):
+        produtos = await service.buscar_produtos([criar_fonte()])
+
+    assert produtos == []
+    assert "possivel bloqueio ou pagina de seguranca" in caplog.text
