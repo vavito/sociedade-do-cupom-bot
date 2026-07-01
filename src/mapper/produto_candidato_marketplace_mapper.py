@@ -67,6 +67,8 @@ def _mapear_bloco(
         return None
 
     marca = _extrair_marca(titulo, fonte)
+    if fonte.exigir_marca_prioritaria and marca is None:
+        return None
     if marca and marca.casefold() in {item.casefold() for item in fonte.marcas_bloqueadas}:
         return None
 

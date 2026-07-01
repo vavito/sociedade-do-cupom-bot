@@ -12,6 +12,7 @@ def criar_fonte(
     preco_minimo: Decimal = Decimal("100"),
     preco_maximo: Decimal = Decimal("1000"),
     limite_por_marca: int | None = 1,
+    exigir_marca_prioritaria: bool = False,
 ) -> FonteProdutoDTO:
     return FonteProdutoDTO(
         loja=loja,
@@ -23,6 +24,7 @@ def criar_fonte(
         palavras_bloqueadas=["membrana"],
         marcas_prioritarias=["redragon", "logitech"],
         limite_por_marca=limite_por_marca,
+        exigir_marca_prioritaria=exigir_marca_prioritaria,
     )
 
 
@@ -122,3 +124,30 @@ def test_limita_quantidade_por_marca_prioritaria() -> None:
     )
 
     assert [produto.external_id for produto in produtos] == ["amazon-b001"]
+
+
+def test_rejeita_produto_sem_marca_quando_fonte_exige_marca_prioritaria() -> None:
+    html = """
+    <div data-component-type="s-search-result" data-asin="B001">
+      <h2><span>Teclado Mecânico Gamer com Fio 95 Teclas</span></h2>
+      <a href="/dp/B001"></a>
+      <span class="a-offscreen">R$ 199,90</span>
+    </div>
+    <div data-component-type="s-search-result" data-asin="B002">
+      <h2><span>Teclado Mecânico Gamer Redragon Kumara</span></h2>
+      <a href="/dp/B002"></a>
+      <span class="a-offscreen">R$ 249,90</span>
+    </div>
+    """
+
+    produtos = mapear_produtos_marketplace(
+        html,
+        criar_fonte(
+            LojaCupom.AMAZON,
+            "teclado",
+            ["teclado", "mecanico"],
+            exigir_marca_prioritaria=True,
+        ),
+    )
+
+    assert [produto.external_id for produto in produtos] == ["amazon-b002"]
