@@ -8,21 +8,40 @@ from urllib.parse import urljoin
 from src.dto.cupom_dto import LojaCupom
 from src.dto.fonte_produto_dto import FonteProdutoDTO
 from src.dto.produto_candidato_dto import ProdutoCandidatoDTO
+from src.dto.produto_fonte_diagnostico_dto import ProdutoFonteDiagnosticoDTO
 
 
 def mapear_produtos_marketplace(
     html_text: str,
     fonte: FonteProdutoDTO,
 ) -> list[ProdutoCandidatoDTO]:
+    return diagnosticar_produtos_marketplace(html_text, fonte).produtos
+
+
+def diagnosticar_produtos_marketplace(
+    html_text: str,
+    fonte: FonteProdutoDTO,
+) -> ProdutoFonteDiagnosticoDTO:
     if fonte.loja == LojaCupom.AMAZON:
-        return _mapear_blocos(_extrair_blocos_amazon(html_text), fonte, "https://www.amazon.com.br")
+        return _diagnosticar_blocos(
+            _extrair_blocos_amazon(html_text),
+            fonte,
+            "https://www.amazon.com.br",
+            motivo_sem_produtos=_motivo_sem_produtos(html_text),
+        )
     if fonte.loja == LojaCupom.MERCADO_LIVRE:
-        return _mapear_blocos(
+        return _diagnosticar_blocos(
             _extrair_blocos_mercado_livre(html_text),
             fonte,
             "https://www.mercadolivre.com.br",
+            motivo_sem_produtos=_motivo_sem_produtos(html_text),
         )
-    return []
+    return ProdutoFonteDiagnosticoDTO(
+        fonte=fonte,
+        total_blocos=0,
+        produtos=[],
+        motivo_sem_produtos="loja nao suportada",
+    )
 
 
 def _mapear_blocos(
@@ -30,24 +49,42 @@ def _mapear_blocos(
     fonte: FonteProdutoDTO,
     base_url: str,
 ) -> list[ProdutoCandidatoDTO]:
+    return _diagnosticar_blocos(blocos, fonte, base_url).produtos
+
+
+def _diagnosticar_blocos(
+    blocos: list[str],
+    fonte: FonteProdutoDTO,
+    base_url: str,
+    motivo_sem_produtos: str | None = None,
+) -> ProdutoFonteDiagnosticoDTO:
     produtos = []
     marcas_por_nome: dict[str, int] = {}
+    rejeicoes: dict[str, int] = {}
 
     for bloco in blocos:
-        produto = _mapear_bloco(bloco, fonte, base_url)
+        produto, motivo_rejeicao = _mapear_bloco_diagnosticado(bloco, fonte, base_url)
         if produto is None:
+            _registrar_rejeicao(rejeicoes, motivo_rejeicao or "desconhecido")
             continue
 
         marca_chave = produto.marca.casefold() if produto.marca else ""
         if marca_chave and fonte.limite_por_marca:
             total_marca = marcas_por_nome.get(marca_chave, 0)
             if total_marca >= fonte.limite_por_marca:
+                _registrar_rejeicao(rejeicoes, "limite_por_marca")
                 continue
             marcas_por_nome[marca_chave] = total_marca + 1
 
         produtos.append(produto)
 
-    return produtos
+    return ProdutoFonteDiagnosticoDTO(
+        fonte=fonte,
+        total_blocos=len(blocos),
+        produtos=produtos,
+        rejeicoes=rejeicoes,
+        motivo_sem_produtos=motivo_sem_produtos if not produtos and not blocos else None,
+    )
 
 
 def _mapear_bloco(
@@ -55,37 +92,50 @@ def _mapear_bloco(
     fonte: FonteProdutoDTO,
     base_url: str,
 ) -> ProdutoCandidatoDTO | None:
+    produto, _ = _mapear_bloco_diagnosticado(bloco, fonte, base_url)
+    return produto
+
+
+def _mapear_bloco_diagnosticado(
+    bloco: str,
+    fonte: FonteProdutoDTO,
+    base_url: str,
+) -> tuple[ProdutoCandidatoDTO | None, str | None]:
     if fonte.ignorar_patrocinados and _bloco_patrocinado(bloco):
-        return None
+        return None, "patrocinado"
 
     titulo = _extrair_titulo(bloco)
     url = _extrair_url(bloco, base_url)
     preco = _extrair_preco(bloco)
     if not titulo or not url or preco is None:
-        return None
+        return None, "campos_incompletos"
 
-    if not _produto_passa_filtros(titulo, preco, fonte):
-        return None
+    motivo_filtro = _motivo_rejeicao_filtros(titulo, preco, fonte)
+    if motivo_filtro is not None:
+        return None, motivo_filtro
 
     marca = _extrair_marca(titulo, fonte)
     if fonte.exigir_marca_prioritaria and marca is None:
-        return None
+        return None, "marca_prioritaria_ausente"
     if marca and marca.casefold() in {item.casefold() for item in fonte.marcas_bloqueadas}:
-        return None
+        return None, "marca_bloqueada"
 
-    return ProdutoCandidatoDTO(
-        loja=fonte.loja,
-        external_id=_external_id(fonte.loja, bloco, url),
-        titulo=titulo,
-        url=url,
-        preco=preco,
-        imagem_url=_extrair_imagem(bloco),
-        categoria=fonte.categoria,
-        marca=marca,
-        raw_data={
-            "fonte_url": str(fonte.url),
-            "patrocinado": _bloco_patrocinado(bloco),
-        },
+    return (
+        ProdutoCandidatoDTO(
+            loja=fonte.loja,
+            external_id=_external_id(fonte.loja, bloco, url),
+            titulo=titulo,
+            url=url,
+            preco=preco,
+            imagem_url=_extrair_imagem(bloco),
+            categoria=fonte.categoria,
+            marca=marca,
+            raw_data={
+                "fonte_url": str(fonte.url),
+                "patrocinado": _bloco_patrocinado(bloco),
+            },
+        ),
+        None,
     )
 
 
@@ -195,14 +245,24 @@ def _extrair_imagem(bloco: str) -> str | None:
 
 
 def _produto_passa_filtros(titulo: str, preco: Decimal, fonte: FonteProdutoDTO) -> bool:
+    return _motivo_rejeicao_filtros(titulo, preco, fonte) is None
+
+
+def _motivo_rejeicao_filtros(
+    titulo: str,
+    preco: Decimal,
+    fonte: FonteProdutoDTO,
+) -> str | None:
     texto = _normalizar(titulo)
     if fonte.preco_minimo is not None and preco < fonte.preco_minimo:
-        return False
+        return "preco_abaixo_minimo"
     if fonte.preco_maximo is not None and preco > fonte.preco_maximo:
-        return False
+        return "preco_acima_maximo"
     if any(_normalizar(palavra) not in texto for palavra in fonte.palavras_obrigatorias):
-        return False
-    return not any(_normalizar(palavra) in texto for palavra in fonte.palavras_bloqueadas)
+        return "palavra_obrigatoria_ausente"
+    if any(_normalizar(palavra) in texto for palavra in fonte.palavras_bloqueadas):
+        return "palavra_bloqueada"
+    return None
 
 
 def _extrair_marca(titulo: str, fonte: FonteProdutoDTO) -> str | None:
@@ -235,6 +295,25 @@ def _extrair_atributo(bloco: str, atributo: str) -> str | None:
 def _bloco_patrocinado(bloco: str) -> bool:
     texto = _normalizar(_limpar_texto(bloco))
     return "patrocinado" in texto or "sponsored" in texto
+
+
+def _registrar_rejeicao(rejeicoes: dict[str, int], motivo: str) -> None:
+    rejeicoes[motivo] = rejeicoes.get(motivo, 0) + 1
+
+
+def _motivo_sem_produtos(html_text: str) -> str:
+    texto = html_text.casefold()
+    indicadores_bloqueio = [
+        "seguridad",
+        "captcha",
+        "robot",
+        "automated",
+        "hubo un error accediendo",
+        "service unavailable",
+    ]
+    if any(indicador in texto for indicador in indicadores_bloqueio):
+        return "possivel bloqueio ou pagina de seguranca"
+    return "nenhum card parseavel"
 
 
 def _limpar_texto(texto_html: str) -> str:
