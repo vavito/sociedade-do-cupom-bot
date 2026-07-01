@@ -2,7 +2,10 @@ from decimal import Decimal
 
 from src.dto.cupom_dto import LojaCupom
 from src.dto.fonte_produto_dto import FonteProdutoDTO
-from src.mapper.produto_candidato_marketplace_mapper import mapear_produtos_marketplace
+from src.mapper.produto_candidato_marketplace_mapper import (
+    diagnosticar_produtos_marketplace,
+    mapear_produtos_marketplace,
+)
 
 
 def criar_fonte(
@@ -168,3 +171,47 @@ def test_filtro_de_palavras_ignora_acentos_reais() -> None:
     )
 
     assert [produto.external_id for produto in produtos] == ["amazon-b004"]
+
+
+def test_diagnostico_conta_rejeicoes_por_motivo() -> None:
+    html = """
+    <div data-component-type="s-search-result" data-asin="B001">
+      <span>Patrocinado</span>
+      <h2><span>Headset Gamer Redragon Zeus</span></h2>
+      <a href="/dp/B001"></a>
+      <span class="a-offscreen">R$ 299,90</span>
+    </div>
+    <div data-component-type="s-search-result" data-asin="B002">
+      <h2><span>Teclado Gamer de Membrana</span></h2>
+      <a href="/dp/B002"></a>
+      <span class="a-offscreen">R$ 159,90</span>
+    </div>
+    <div data-component-type="s-search-result" data-asin="B003">
+      <h2><span>Teclado Mecânico Redragon Kumara</span></h2>
+      <a href="/dp/B003"></a>
+      <span class="a-offscreen">R$ 249,90</span>
+    </div>
+    <div data-component-type="s-search-result" data-asin="B004">
+      <h2><span>Teclado Mecânico Redragon Fizz</span></h2>
+      <a href="/dp/B004"></a>
+      <span class="a-offscreen">R$ 229,90</span>
+    </div>
+    """
+
+    diagnostico = diagnosticar_produtos_marketplace(
+        html,
+        criar_fonte(
+            LojaCupom.AMAZON,
+            "teclado",
+            ["teclado", "mecanico"],
+            limite_por_marca=1,
+        ),
+    )
+
+    assert diagnostico.total_blocos == 4
+    assert [produto.external_id for produto in diagnostico.produtos] == ["amazon-b003"]
+    assert diagnostico.rejeicoes == {
+        "patrocinado": 1,
+        "palavra_obrigatoria_ausente": 1,
+        "limite_por_marca": 1,
+    }

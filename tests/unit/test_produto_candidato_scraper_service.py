@@ -15,6 +15,11 @@ class FakeMarketplaceProdutoClient:
         return self.html_por_url[url]
 
 
+class FakeFailingProdutoClient:
+    async def buscar_html(self, url: str) -> str:
+        raise RuntimeError("timeout")
+
+
 def criar_fonte(url: str = "https://example.com/headset") -> FonteProdutoDTO:
     return FonteProdutoDTO(
         loja=LojaCupom.AMAZON,
@@ -87,3 +92,27 @@ async def test_avisa_quando_fonte_parece_bloqueada(caplog) -> None:  # type: ign
 
     assert produtos == []
     assert "possivel bloqueio ou pagina de seguranca" in caplog.text
+
+
+async def test_diagnosticar_fontes_retorna_motivos_por_fonte() -> None:
+    html = "<html><title>Seguridad - Mercado Livre</title><body>captcha</body></html>"
+    service = ProdutoCandidatoScraperService(
+        FakeMarketplaceProdutoClient({"https://example.com/headset": html})  # type: ignore[arg-type]
+    )
+
+    diagnosticos = await service.diagnosticar_fontes([criar_fonte()])
+
+    assert len(diagnosticos) == 1
+    assert diagnosticos[0].total_blocos == 0
+    assert diagnosticos[0].produtos == []
+    assert diagnosticos[0].motivo_sem_produtos == "possivel bloqueio ou pagina de seguranca"
+
+
+async def test_diagnosticar_fontes_registra_erro_de_busca() -> None:
+    service = ProdutoCandidatoScraperService(FakeFailingProdutoClient())  # type: ignore[arg-type]
+
+    diagnosticos = await service.diagnosticar_fontes([criar_fonte()])
+
+    assert len(diagnosticos) == 1
+    assert diagnosticos[0].erro == "timeout"
+    assert diagnosticos[0].motivo_sem_produtos == "falha ao buscar html"
