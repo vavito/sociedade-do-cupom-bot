@@ -179,6 +179,24 @@ Para publicar os previews gerados no canal configurado em `TELEGRAM_CHAT_ID`:
 uv run python -m src.tools.publicar_previews_cupom --limite 3 --confirmar-envio
 ```
 
+Para rodar a rotina diaria completa, atualizando produtos candidatos, buscando cupons, gerando previews e mantendo o envio em dry-run:
+
+```bash
+uv run python -m src.tools.rotina_cupons --browser --limite-por-fonte 5 --limite 3
+```
+
+Esse comando salva `data/produtos_candidatos.json` por padrao antes de montar os previews, para usar os produtos recem-coletados. Se quiser apenas simular sem atualizar o JSON de produtos:
+
+```bash
+uv run python -m src.tools.rotina_cupons --browser --nao-salvar-produtos
+```
+
+Para enviar os posts gerados no canal, a rotina tambem exige confirmacao explicita:
+
+```bash
+uv run python -m src.tools.rotina_cupons --browser --limite 3 --confirmar-envio
+```
+
 Para testar com um historico separado:
 
 ```bash
