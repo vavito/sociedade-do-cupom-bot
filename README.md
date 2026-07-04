@@ -101,6 +101,13 @@ Para diagnosticar cada fonte antes de salvar produtos, mostrando quantos cards f
 uv run python -m src.tools.diagnosticar_fontes_produtos --browser --limite-por-fonte 3
 ```
 
+Para diagnosticar apenas algumas categorias ou lojas:
+
+```bash
+uv run python -m src.tools.diagnosticar_fontes_produtos --browser --limite-por-fonte 3 --categoria headset_fone --categoria teclado --categoria acessorio
+uv run python -m src.tools.diagnosticar_fontes_produtos --browser --loja amazon --categoria headset_fone
+```
+
 Se HTTP direto retornar bloqueio ou HTML incompleto, instale o Chromium do Playwright:
 
 ```bash
