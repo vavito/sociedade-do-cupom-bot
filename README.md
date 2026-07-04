@@ -126,6 +126,12 @@ Para abrir o navegador visivel e reaproveitar cookies/sessao no perfil local `.b
 uv run python -m src.tools.atualizar_produtos_candidatos --browser --browser-visivel --limite-por-fonte 5
 ```
 
+Se Mercado Livre mostrar captcha ou pagina de seguranca, rode com uma janela de espera para resolver manualmente no navegador visivel. O perfil persistente `.browser/produtos` reutiliza a sessao nas proximas execucoes:
+
+```bash
+uv run python -m src.tools.diagnosticar_fontes_produtos --browser --browser-visivel --browser-espera-seguranca 120000 --loja mercado_livre --categoria headset_fone
+```
+
 Para atualizar `data/produtos_candidatos.json` com o resultado do scraping:
 
 ```bash
