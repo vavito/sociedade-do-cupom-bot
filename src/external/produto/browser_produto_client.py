@@ -21,6 +21,16 @@ class BrowserProdutoClient:
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/126.0.0.0 Safari/537.36"
     )
+    INDICADORES_SEGURANCA = (
+        "captcha",
+        "captchait",
+        "seguridad",
+        "security",
+        "robot",
+        "automated",
+        "hubo un error accediendo",
+        "service unavailable",
+    )
 
     def __init__(
         self,
@@ -29,12 +39,14 @@ class BrowserProdutoClient:
         timeout_ms: int = 45_000,
         scrolls: int = 3,
         delay_ms: int = 800,
+        security_wait_ms: int = 0,
     ) -> None:
         self.user_data_dir = Path(user_data_dir)
         self.headless = headless
         self.timeout_ms = timeout_ms
         self.scrolls = scrolls
         self.delay_ms = delay_ms
+        self.security_wait_ms = security_wait_ms
 
     async def buscar_html(self, url: str) -> str:
         self.user_data_dir.mkdir(parents=True, exist_ok=True)
@@ -60,6 +72,7 @@ class BrowserProdutoClient:
         await page.goto(url, wait_until="domcontentloaded", timeout=self.timeout_ms)
         with suppress(PlaywrightTimeoutError):
             await page.wait_for_load_state("networkidle", timeout=min(self.timeout_ms, 10_000))
+        await self._aguardar_intervencao_seguranca(page)
         await self._rolar_pagina(page)
 
     async def _obter_conteudo(self, page: Page) -> str:
@@ -77,6 +90,31 @@ class BrowserProdutoClient:
             await page.mouse.wheel(0, 900)
             await page.wait_for_timeout(self.delay_ms)
         await asyncio.sleep(self.delay_ms / 1000)
+
+    async def _aguardar_intervencao_seguranca(self, page: Page) -> None:
+        if self.security_wait_ms <= 0:
+            return
+
+        html = await self._obter_conteudo(page)
+        if not self._pagina_de_seguranca(html):
+            return
+
+        await page.wait_for_timeout(self.security_wait_ms)
+        with suppress(PlaywrightTimeoutError):
+            await page.wait_for_load_state("networkidle", timeout=min(self.timeout_ms, 10_000))
+
+        html = await self._obter_conteudo(page)
+        if not self._pagina_de_seguranca(html):
+            return
+
+        with suppress(PlaywrightError, PlaywrightTimeoutError):
+            await page.reload(wait_until="domcontentloaded", timeout=self.timeout_ms)
+            await page.wait_for_load_state("networkidle", timeout=min(self.timeout_ms, 10_000))
+
+    @classmethod
+    def _pagina_de_seguranca(cls, html: str) -> bool:
+        texto = html.casefold()
+        return any(indicador in texto for indicador in cls.INDICADORES_SEGURANCA)
 
     @staticmethod
     async def _fechar_contexto(context: BrowserContext) -> None:

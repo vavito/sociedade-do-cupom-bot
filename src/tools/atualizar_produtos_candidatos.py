@@ -64,6 +64,7 @@ def _criar_client(args: argparse.Namespace) -> ProdutoHtmlClient:
             timeout_ms=args.browser_timeout,
             scrolls=args.browser_scrolls,
             delay_ms=args.browser_delay,
+            security_wait_ms=args.browser_espera_seguranca,
         )
     return MarketplaceProdutoClient()
 
@@ -155,6 +156,14 @@ def _parse_args() -> argparse.Namespace:
         type=int,
         default=800,
         help="Espera em milissegundos entre rolagens do browser.",
+    )
+    parser.add_argument(
+        "--browser-espera-seguranca",
+        type=int,
+        default=0,
+        help=(
+            "Espera em milissegundos para resolver captcha/pagina de seguranca no browser visivel."
+        ),
     )
     return parser.parse_args()
 

@@ -30,6 +30,7 @@ def test_criar_produto_client_browser_quando_solicitado() -> None:
             browser_timeout=30_000,
             browser_scrolls=5,
             browser_delay=250,
+            browser_espera_seguranca=60_000,
         )
     )
 
@@ -39,3 +40,4 @@ def test_criar_produto_client_browser_quando_solicitado() -> None:
     assert client.timeout_ms == 30_000
     assert client.scrolls == 5
     assert client.delay_ms == 250
+    assert client.security_wait_ms == 60_000
