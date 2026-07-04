@@ -240,7 +240,7 @@
     {
         "loja": "mercado_livre",
         "categoria": "headset_fone",
-        "url": "https://lista.mercadolivre.com.br/headset-gamer-fone-qcy_PriceRange_100BRL-1000BRL_NoIndex_True",
+        "url": "https://lista.mercadolivre.com.br/headset-gamer_PriceRange_150BRL-1000BRL_NoIndex_True",
         "preco_minimo": "100",
         "preco_maximo": "1000",
         "palavras_obrigatorias": [],
@@ -310,9 +310,9 @@
     {
         "loja": "amazon",
         "categoria": "acessorio",
-        "url": "https://www.amazon.com.br/s?k=braco+articulado+monitor&low-price=0&high-price=250",
+        "url": "https://www.amazon.com.br/s?k=braco+articulado+monitor&low-price=0&high-price=200",
         "preco_minimo": "0",
-        "preco_maximo": "250",
+        "preco_maximo": "200",
         "palavras_obrigatorias": ["braco"],
         "palavras_bloqueadas": [],
         "marcas_prioritarias": [],
@@ -324,9 +324,9 @@
     {
         "loja": "mercado_livre",
         "categoria": "acessorio",
-        "url": "https://lista.mercadolivre.com.br/braco-articulado_PriceRange_0BRL-250BRL_NoIndex_True",
+        "url": "https://lista.mercadolivre.com.br/braco-articulado_PriceRange_0BRL-200BRL_NoIndex_True?sb=all_mercadolibre",
         "preco_minimo": "0",
-        "preco_maximo": "250",
+        "preco_maximo": "200",
         "palavras_obrigatorias": ["braco"],
         "palavras_bloqueadas": [],
         "marcas_prioritarias": [],

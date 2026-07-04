@@ -4,6 +4,8 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
+from src.dto.cupom_dto import LojaCupom
+from src.dto.fonte_produto_dto import FonteProdutoDTO
 from src.dto.produto_fonte_diagnostico_dto import ProdutoFonteDiagnosticoDTO
 from src.external.produto.browser_produto_client import BrowserProdutoClient
 from src.external.produto.marketplace_produto_client import MarketplaceProdutoClient
@@ -22,7 +24,11 @@ def main() -> None:
 async def _main() -> None:
     args = _parse_args()
     data_referencia = _parse_date(args.data_referencia) if args.data_referencia else None
-    fontes = FonteProdutoSeedService().carregar_de_arquivo(args.fontes)
+    fontes = _filtrar_fontes(
+        FonteProdutoSeedService().carregar_de_arquivo(args.fontes),
+        lojas=args.lojas,
+        categorias=args.categorias,
+    )
     scraper_service = ProdutoCandidatoScraperService(
         _criar_client(args),
         catalogo_service=ProdutoCandidatoCatalogoService(),
@@ -35,6 +41,21 @@ async def _main() -> None:
     )
 
     _imprimir_diagnosticos(diagnosticos)
+
+
+def _filtrar_fontes(
+    fontes: list[FonteProdutoDTO],
+    lojas: list[str] | None = None,
+    categorias: list[str] | None = None,
+) -> list[FonteProdutoDTO]:
+    lojas_normalizadas = {loja.casefold() for loja in lojas or []}
+    categorias_normalizadas = {categoria.casefold() for categoria in categorias or []}
+    return [
+        fonte
+        for fonte in fontes
+        if (not lojas_normalizadas or fonte.loja.casefold() in lojas_normalizadas)
+        and (not categorias_normalizadas or fonte.categoria.casefold() in categorias_normalizadas)
+    ]
 
 
 def _criar_client(args: argparse.Namespace) -> ProdutoHtmlClient:
@@ -103,6 +124,19 @@ def _parse_args() -> argparse.Namespace:
         type=int,
         default=3,
         help="Quantidade maxima de produtos aceitos por fonte no diagnostico.",
+    )
+    parser.add_argument(
+        "--loja",
+        dest="lojas",
+        action="append",
+        choices=[LojaCupom.AMAZON.value, LojaCupom.MERCADO_LIVRE.value],
+        help="Filtra uma loja especifica. Pode ser repetido.",
+    )
+    parser.add_argument(
+        "--categoria",
+        dest="categorias",
+        action="append",
+        help="Filtra uma categoria especifica. Pode ser repetido.",
     )
     parser.add_argument(
         "--data-referencia",
