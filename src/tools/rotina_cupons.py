@@ -24,6 +24,10 @@ from src.service.produto_candidato_scraper_service import (
     ProdutoHtmlClient,
 )
 from src.service.produto_candidato_update_service import ProdutoCandidatoUpdateService
+from src.tools.filtros_fontes_produto import (
+    adicionar_argumentos_filtro_fontes,
+    filtrar_fontes,
+)
 
 
 def main() -> None:
@@ -36,6 +40,11 @@ async def _main() -> None:
     momento = datetime.now()
 
     service = _criar_rotina_service(args)
+    fontes = filtrar_fontes(
+        FonteProdutoSeedService().carregar_de_arquivo(args.fontes),
+        lojas=args.lojas,
+        categorias=args.categorias,
+    )
     resultado = await service.executar(
         caminho_fontes=args.fontes,
         caminho_produtos=args.produtos,
@@ -47,6 +56,7 @@ async def _main() -> None:
         salvar_produtos=args.salvar_produtos,
         confirmar_envio=args.confirmar_envio,
         filtrar_cupons=not args.sem_filtro,
+        fontes=fontes,
         agora=momento,
     )
 
@@ -169,6 +179,7 @@ def _parse_args() -> argparse.Namespace:
         default=3,
         help="Quantidade maxima de posts enviados.",
     )
+    adicionar_argumentos_filtro_fontes(parser)
     parser.add_argument(
         "--data-referencia",
         help="Data dos produtos candidatos no formato YYYY-MM-DD. Padrao: hoje.",

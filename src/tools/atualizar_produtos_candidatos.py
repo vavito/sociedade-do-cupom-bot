@@ -16,6 +16,10 @@ from src.service.produto_candidato_update_service import (
     ProdutoCandidatoUpdateResultado,
     ProdutoCandidatoUpdateService,
 )
+from src.tools.filtros_fontes_produto import (
+    adicionar_argumentos_filtro_fontes,
+    filtrar_fontes,
+)
 
 
 def main() -> None:
@@ -36,9 +40,14 @@ async def _main() -> None:
         fonte_service=fonte_service,
         catalogo_service=catalogo_service,
     )
+    fontes = filtrar_fontes(
+        fonte_service.carregar_de_arquivo(args.fontes),
+        lojas=args.lojas,
+        categorias=args.categorias,
+    )
 
-    resultado = await update_service.atualizar(
-        caminho_fontes=args.fontes,
+    resultado = await update_service.atualizar_por_fontes(
+        fontes=fontes,
         caminho_saida=args.saida,
         data_referencia=data_referencia,
         limite_por_fonte=args.limite_por_fonte,
@@ -109,6 +118,7 @@ def _parse_args() -> argparse.Namespace:
         default=10,
         help="Quantidade maxima de produtos aceitos por fonte.",
     )
+    adicionar_argumentos_filtro_fontes(parser)
     parser.add_argument(
         "--data-referencia",
         help="Data dos produtos candidatos no formato YYYY-MM-DD. Padrao: vazio.",

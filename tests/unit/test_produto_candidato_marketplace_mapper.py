@@ -107,6 +107,37 @@ def test_mapeia_produtos_mercado_livre_com_faixa_de_preco() -> None:
     assert produtos[0].marca == "logitech"
 
 
+def test_rejeita_patrocinado_mercado_livre_por_url_de_anuncio() -> None:
+    html = """
+    <li class="ui-search-layout__item">
+      <a href="https://click1.mercadolivre.com.br/mclics/clicks/external/MLB/count?is_advertising=true&type=pad&wid=MLB111111">
+        <h2 class="poly-component__title">Teclado MecÃ¢nico Redragon Dark Avenger</h2>
+      </a>
+      <span class="andes-money-amount">
+        <span class="andes-money-amount__fraction">299</span>
+        <span class="andes-money-amount__cents">90</span>
+      </span>
+    </li>
+    <li class="ui-search-layout__item">
+      <a href="https://www.mercadolivre.com.br/teclado-mecanico-redragon/p/MLB222222">
+        <h2 class="poly-component__title">Teclado MecÃ¢nico Redragon Kumara</h2>
+      </a>
+      <span class="andes-money-amount">
+        <span class="andes-money-amount__fraction">249</span>
+        <span class="andes-money-amount__cents">90</span>
+      </span>
+    </li>
+    """
+
+    diagnostico = diagnosticar_produtos_marketplace(
+        html,
+        criar_fonte(LojaCupom.MERCADO_LIVRE, "teclado", ["teclado", "mecanico"]),
+    )
+
+    assert [produto.external_id for produto in diagnostico.produtos] == ["ml-mlb222222"]
+    assert diagnostico.rejeicoes["patrocinado"] == 1
+
+
 def test_limita_quantidade_por_marca_prioritaria() -> None:
     html = """
     <div data-component-type="s-search-result" data-asin="B001">
