@@ -4,8 +4,6 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-from src.dto.cupom_dto import LojaCupom
-from src.dto.fonte_produto_dto import FonteProdutoDTO
 from src.dto.produto_fonte_diagnostico_dto import ProdutoFonteDiagnosticoDTO
 from src.external.produto.browser_produto_client import BrowserProdutoClient
 from src.external.produto.marketplace_produto_client import MarketplaceProdutoClient
@@ -14,6 +12,12 @@ from src.service.produto_candidato_catalogo_service import ProdutoCandidatoCatal
 from src.service.produto_candidato_scraper_service import (
     ProdutoCandidatoScraperService,
     ProdutoHtmlClient,
+)
+from src.tools.filtros_fontes_produto import (
+    adicionar_argumentos_filtro_fontes,
+)
+from src.tools.filtros_fontes_produto import (
+    filtrar_fontes as _filtrar_fontes,
 )
 
 
@@ -41,21 +45,6 @@ async def _main() -> None:
     )
 
     _imprimir_diagnosticos(diagnosticos)
-
-
-def _filtrar_fontes(
-    fontes: list[FonteProdutoDTO],
-    lojas: list[str] | None = None,
-    categorias: list[str] | None = None,
-) -> list[FonteProdutoDTO]:
-    lojas_normalizadas = {loja.casefold() for loja in lojas or []}
-    categorias_normalizadas = {categoria.casefold() for categoria in categorias or []}
-    return [
-        fonte
-        for fonte in fontes
-        if (not lojas_normalizadas or fonte.loja.casefold() in lojas_normalizadas)
-        and (not categorias_normalizadas or fonte.categoria.casefold() in categorias_normalizadas)
-    ]
 
 
 def _criar_client(args: argparse.Namespace) -> ProdutoHtmlClient:
@@ -126,19 +115,7 @@ def _parse_args() -> argparse.Namespace:
         default=3,
         help="Quantidade maxima de produtos aceitos por fonte no diagnostico.",
     )
-    parser.add_argument(
-        "--loja",
-        dest="lojas",
-        action="append",
-        choices=[LojaCupom.AMAZON.value, LojaCupom.MERCADO_LIVRE.value],
-        help="Filtra uma loja especifica. Pode ser repetido.",
-    )
-    parser.add_argument(
-        "--categoria",
-        dest="categorias",
-        action="append",
-        help="Filtra uma categoria especifica. Pode ser repetido.",
-    )
+    adicionar_argumentos_filtro_fontes(parser)
     parser.add_argument(
         "--data-referencia",
         help="Data dos produtos candidatos no formato YYYY-MM-DD. Padrao: vazio.",

@@ -95,6 +95,12 @@ Para buscar produtos candidatos dessas fontes sem salvar:
 uv run python -m src.tools.atualizar_produtos_candidatos --limite-por-fonte 5
 ```
 
+Para buscar apenas uma loja/categoria, util para testes rapidos:
+
+```bash
+uv run python -m src.tools.atualizar_produtos_candidatos --browser --loja mercado_livre --categoria teclado --limite-por-fonte 3
+```
+
 Para diagnosticar cada fonte antes de salvar produtos, mostrando quantos cards foram encontrados, quantos produtos passaram nos filtros e os principais motivos de rejeicao:
 
 ```bash
@@ -136,6 +142,12 @@ Para atualizar `data/produtos_candidatos.json` com o resultado do scraping:
 
 ```bash
 uv run python -m src.tools.atualizar_produtos_candidatos --limite-por-fonte 5 --salvar
+```
+
+Para salvar apenas os produtos de teclado do Mercado Livre:
+
+```bash
+uv run python -m src.tools.atualizar_produtos_candidatos --browser --loja mercado_livre --categoria teclado --limite-por-fonte 3 --salvar
 ```
 
 Use `--manter-existentes` quando quiser preservar produtos cadastrados manualmente e substituir apenas duplicados encontrados pelo scraper.
@@ -204,6 +216,12 @@ Para rodar a rotina diaria completa, atualizando produtos candidatos, buscando c
 
 ```bash
 uv run python -m src.tools.rotina_cupons --browser --limite-por-fonte 5 --limite 3
+```
+
+Para rodar a rotina diaria apenas com uma categoria durante a validacao:
+
+```bash
+uv run python -m src.tools.rotina_cupons --browser --loja mercado_livre --categoria teclado --limite-por-fonte 3 --limite 3
 ```
 
 Esse comando salva `data/produtos_candidatos.json` por padrao antes de montar os previews, para usar os produtos recem-coletados. Se quiser apenas simular sem atualizar o JSON de produtos:

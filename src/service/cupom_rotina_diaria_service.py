@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 
+from src.dto.fonte_produto_dto import FonteProdutoDTO
 from src.dto.produto_candidato_dto import ProdutoCandidatoDTO
 from src.service.cupom_postagem_historico_service import CupomPostagemHistoricoService
 from src.service.cupom_postagem_service import CupomPostagemResultado, CupomPostagemService
@@ -47,17 +48,28 @@ class CupomRotinaDiariaService:
         salvar_produtos: bool = True,
         confirmar_envio: bool = False,
         filtrar_cupons: bool = True,
+        fontes: list[FonteProdutoDTO] | None = None,
         agora: datetime | None = None,
     ) -> CupomRotinaDiariaResultado:
         momento = agora or datetime.now()
-        produtos_resultado = await self.produto_update_service.atualizar(
-            caminho_fontes=caminho_fontes,
-            caminho_saida=caminho_produtos,
-            data_referencia=data_referencia,
-            limite_por_fonte=limite_por_fonte,
-            manter_existentes=manter_existentes,
-            salvar=salvar_produtos,
-        )
+        if fontes is None:
+            produtos_resultado = await self.produto_update_service.atualizar(
+                caminho_fontes=caminho_fontes,
+                caminho_saida=caminho_produtos,
+                data_referencia=data_referencia,
+                limite_por_fonte=limite_por_fonte,
+                manter_existentes=manter_existentes,
+                salvar=salvar_produtos,
+            )
+        else:
+            produtos_resultado = await self.produto_update_service.atualizar_por_fontes(
+                fontes=fontes,
+                caminho_saida=caminho_produtos,
+                data_referencia=data_referencia,
+                limite_por_fonte=limite_por_fonte,
+                manter_existentes=manter_existentes,
+                salvar=salvar_produtos,
+            )
 
         postagens_por_produto = self.historico_service.carregar_de_arquivo(caminho_historico)
         previews_resultado = await self.preview_runner.gerar_previews(
