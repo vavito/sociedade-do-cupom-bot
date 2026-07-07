@@ -293,8 +293,16 @@ def _extrair_atributo(bloco: str, atributo: str) -> str | None:
 
 
 def _bloco_patrocinado(bloco: str) -> bool:
-    texto = _normalizar(_limpar_texto(bloco))
-    return "patrocinado" in texto or "sponsored" in texto
+    texto_visivel = _normalizar(_limpar_texto(bloco))
+    texto_html = _normalizar(html.unescape(bloco))
+    indicadores = [
+        "patrocinado",
+        "sponsored",
+        "click1.mercadolivre.com.br",
+        "is_advertising=true",
+        "type=pad",
+    ]
+    return any(indicador in texto_visivel or indicador in texto_html for indicador in indicadores)
 
 
 def _registrar_rejeicao(rejeicoes: dict[str, int], motivo: str) -> None:
